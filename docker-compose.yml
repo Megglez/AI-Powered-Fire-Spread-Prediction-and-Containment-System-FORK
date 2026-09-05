@@ -4,7 +4,7 @@ services:
     container_name: nginx-gateway
     restart: unless-stopped
     ports:
-      - "3000:80"
+      - "127.0.0.1:3000:80"
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
@@ -27,7 +27,7 @@ services:
     volumes:
       - ./database/postgres:/var/lib/postgresql/data:Z
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
@@ -45,7 +45,7 @@ services:
     volumes:
       - pgadmin-data:/var/lib/pgadmin
     ports:
-      - "8080:80"
+      - "127.0.0.1:8080:80"
     depends_on:
       - postgres
 
@@ -55,11 +55,12 @@ services:
     build:
       context: .
       dockerfile: app/backend/Dockerfile
+      target: dev
     container_name: python-backend
     environment:
       - VALKEY_HOST=valkey
       - MINIO_ENDPOINT=minio:9000
-      - PYTHONPATH=/
+      - PYTHONPATH=/app
       - VALKEY_PORT=6379
     restart: unless-stopped
     env_file:
@@ -72,10 +73,10 @@ services:
       valkey:
         condition: service_healthy
     volumes:
-      - .:/app:Z
-      - /app/venv  
+      - ./app/backend:/app/app/backend:Z
+      - ./app/ml:/app/app/ml:Z 
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     command: ["uvicorn", "app.backend.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
 
   frontend:
@@ -116,8 +117,8 @@ services:
     volumes:
       - ./database/minio:/data:Z
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
     command: server /data --console-address ":9001"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://minio:9000/minio/health/live"]
@@ -129,32 +130,31 @@ services:
     container_name: valkey-cache
     restart: unless-stopped
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
     healthcheck:
       test: ["CMD", "valkey-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
       
-  
-  
   reseed:
     build:
-      context: ./app/backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./app/backend/Dockerfile
+      target: dev
     profiles: ["tools"]
     env_file:
       - .env
     environment:
-      - PYTHONPATH=/app/src:/app
+      - PYTHONPATH=/app/
       - SEED_DEFAULT_PASSWORD=${SEED_DEFAULT_PASSWORD}
       - SEED_ADMIN_PASSWORD=${SEED_ADMIN_PASSWORD}
     volumes:
-      - ./app/backend:/app:Z
+      - ./app/backend:/app/app/backend:Z
     depends_on:
       postgres:
         condition: service_healthy
-    command: ["python", "seed.py", "--reseed"]
+    command: ["python", "app/backend/seed.py", "--reseed"]
 
   # pwa:
   #   build:

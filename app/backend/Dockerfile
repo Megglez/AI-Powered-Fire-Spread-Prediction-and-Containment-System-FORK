@@ -47,8 +47,8 @@ CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
 
 FROM base AS prod 
 
-COPY app/backend /app
-COPY app/ml /app/ml
+COPY app/backend app/app/backend
+COPY app/ml app/app/ml
 
 EXPOSE 8000
 
