@@ -70,7 +70,7 @@ docker compose ps
 
 | Service | URL / Address | Notes|
 |---|---|---|
-| Frontend web app | http://localhost:3000 | Served **through niginx**, not the frontend container directly — the frontend only exposes port 3000 internally|
+| Frontend web app | http://localhost:3000 | Served **through nginx**, not the frontend container directly — the frontend only exposes port 3000 internally|
 | Backend API docs (Swagger) | http://localhost:8000/docs | Published  directly, bypass nginx |
 | pgAdmin | http://localhost:8080 | |
 | MinIO Console | http://localhost:9001 | |
@@ -91,7 +91,7 @@ This executes in  `app/backend/seed.py --reseed` and removes the runner containe
 
 ### Frontend
 
-Install pacages inside the running frontend container (it uses an isolated named volume, `frontend_node_modules`):
+Install packages inside the running frontend container (it uses an isolated named volume, `frontend_node_modules`):
 
 ```bash
 docker compose exec frontend yarn add <package_name>
@@ -107,7 +107,7 @@ The production image (`app/backend/Dockerfile`) installs from `requirements.txt`
 
 To add a new production dependency:
 
-1. Add it to `app/backend/requirements,in`.
+1. Add it to `app/backend/requirements.in`.
 2. Regenerate the hashed lockfile:
 
 ```bash
@@ -134,7 +134,7 @@ To run the suites via the Makefile, from `app/backend/`:
 ```bash 
 make test   # starts test infra, runs pytest in a container
 make lint   # runs pylint in a container
-make shell  # opens a shell in the backens-test container
+make shell  # opens a shell in the backend-test container
 make clean  # tears down test infra and volumes
 ```
 Run `make help` for the full list of targets.

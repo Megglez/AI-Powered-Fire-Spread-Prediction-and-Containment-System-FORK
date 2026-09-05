@@ -8,7 +8,7 @@ COMPOSE_TEST := docker compose -f $(ROOT)/docker-compose.tet.yml
 
 help:
 	@echo "Backend test targets:"
-	@echo " make test-up	- start test-db, test-minio, test-valkey"
+	@echo " make test-up	- start test-db, test-minio"
 	@echo " make test		- run the pytest suite in a container"
 	@echo " make lint		- run pylint in a container"
 	@echo " make shell		- open a shell in the backend-test container"
@@ -17,7 +17,7 @@ help:
 	@echo " make clean		- test-down plus remove test volumes"
 
 test-up:
-	$(COMPOSE_TEST) up -d test-db test-minio test-valkey
+	$(COMPOSE_TEST) up -d test-db test-minio
 
 test: test-up
 	$(COMPOSE_TEST) run --rm backend-test
@@ -29,7 +29,7 @@ shell: test-up
 	$(COMPOSE_TEST) run --rm backend-test bash
 
 logs: 
-	$(COMPOSE_TEST) logs -f test-db test-minio test-valkey
+	$(COMPOSE_TEST) logs -f test-db test-minio
 
 test-down:
 	$(COMPOSE_TEST) down
