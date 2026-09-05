@@ -1,6 +1,8 @@
 # Project Setup Guide
 
-This guide will walk you through the configuration and running of FireAway's application stack using Docker. 
+This guide will walk you through the configuration and running of FireAway's application stack using Docker.
+
+> ** Note on PWA:** Instructions will be added later
 
 ## 1. Prerequisites
 
@@ -8,6 +10,7 @@ Ensure that the following tools are installed on your Linux or WSL environment b
 
 - Docker Engine and Docker Compose v2 (`docker compose version`)
 - Git (`git --version`)
+- Python 3.10+ - required, not optional, the test suite runs on the host rat
 - Node.js and 
 
 ```bash

@@ -33,3 +33,23 @@ services:
       - "9003:9001"
     
     restart: unless-stopped
+
+  backend-test:
+    build:
+      context: .
+      dockerfile: app/backend/Dockerfile
+      target: test
+    environment:
+      PYTHONPATH: /
+      DATABASE_URL: postgresql://postgres:postgres@test-db:5432/test_fire_db
+      MINIO_ENDPOINT: test-minio:9000
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: miniosupersecretpassword
+    volumes:
+      - .:/app/Z
+    depends_on:
+      test-db:
+        condition: service_healthy
+      test-minio:
+        condition: service_healthy
+    command: ["pytest", "app/backend/testing"]
