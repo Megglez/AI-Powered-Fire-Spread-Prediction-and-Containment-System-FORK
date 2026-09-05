@@ -81,7 +81,7 @@ docker compose ps
 
 The `reseed` service is gated behind the `tools` Compose profile, so the profile flag is required even with `run`:
 
-``bash
+```bash
 docker compose --profile tools run --rm reseed
 ```
 
