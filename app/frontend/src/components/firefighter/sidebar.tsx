@@ -1,7 +1,17 @@
 import React from 'react';
 import { BookAlert, Map, LayoutDashboard, Settings, LogOut } from 'lucide-react';
+import { logout } from '@/lib/api';
+import { useState } from 'react';
 
 export function SidebarLayout({ children = undefined }: { children?: React.ReactNode }) {
+  const [loggingOut, setLoggingOut] = useState(false)
+
+  const handleLogout = async () => {
+    if(loggingOut) return;
+    setLoggingOut(true);
+    await logout();
+  }
+
   return (
     <div className="flex min-h-screen bg-carbon-bg text-text-primary font-body antialiased relative z-0">
       {/* Atmospheric Background Blooms */}
