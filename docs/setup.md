@@ -1,9 +1,14 @@
-# Docker Setup
+# Project Setup Guide
 
-## Prerequisites
+This guide will walk you through the configuration and running of FireAway's application stack using Docker. 
 
-- Install Docker Engine and Docker Compose / Docker CLI with Compose support.
-- Install Yarn globally or enable Corepack:
+## 1. Prerequisites
+
+Ensure that the following tools are installed on your Linux or WSL environment before starting:
+
+- Docker Engine and Docker Compose v2 (`docker compose version`)
+- Git (`git --version`)
+- Node.js and 
 
 ```bash
 npm i -g yarn
