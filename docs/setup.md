@@ -10,148 +10,169 @@ Ensure that the following tools are installed on your Linux or WSL environment b
 
 - Docker Engine and Docker Compose v2 (`docker compose version`)
 - Git (`git --version`)
-- Python 3.10+ - required, not optional, the test suite runs on the host rat
-- Node.js and 
+- `make` - used to run the backend and frontend test suites via the provided Makefiles
+- Python 3.10+ - **optional**, this is only needed if you want autocomplete locally in your editor.
 
-```bash
-npm i -g yarn
-```
+## 2. Initial Configuration
 
-```bash
-corepack enable
-```
-- Copy `.env.example` to `.env` at the repository root and fill in the required values:
+Clone our repository and navigate into the repository root, then copy the environment template:
 
 ```bash
 cp .env.example .env
 ```
 
-## Frontend styling (Tailwind + DaisyUI)
+## 3. Build and Start the Application Stack
 
-The Next.js frontend uses Tailwind CSS with DaisyUI.
+Run all of these commands from your repository root, where `docker-compose.ylm` is.
 
-From `app/frontend/src`, install dependencies:
+Remove any stale containers, networksm or volumes for a clean start:
 
 ```bash
-yarn add -D tailwindcss postcss autoprefixer daisyui
+docker compose down -v --remove-orphans
 ```
 
-These files are expected in the frontend package:
-
-- `tailwind.config.js`
-- `postcss.config.js`
-- `styles/globals.css`
-- `pages/_app.js` (imports `styles/globals.css`)
-
-## Build the Docker containers
-
-From the repository root, run:
+Build all our images:
 
 ```bash
 docker compose build
 ```
 
-This command builds the following services:
+This builds:
 
-- `backend` – Python API server from `app/backend/src/Dockerfile`
-- `frontend` – Next.js web app from `app/frontend/src/Dockerfile`
-- `pwa` – React Native / Expo app from `app/pwa/Dockerfile`
-- `postgres` – PostGIS database
-- `pgadmin` – pgAdmin database management UI
+- `nginx` - reverse proxy in front of the frontend/backend (`nginx:alpine`, config from `nginx/default.conf`)
+- `backend` – FastAPI server (`app/backend/Dockerfile`, `python:3.12-slim`)
+- `frontend` – Next.js app (`app/frontend/Dockerfile`, `node:22-alpine`)
+- `pwa` – React Native / Expo app from `app/pwa/Dockerfile` (Janri will add the other instructions for the PWA)
+- `postgres` – PostGIS database (`postgis/postgis:15-3.5`)
+- `pgadmin` – Postgres admin GUI
+- `minio` - S3-compatible object storage
+- `valkey` - Redis-compatible cache (`valkey/valkey:latest`)
 
-## Start the application stack
-
-Run the full stack in the foreground:
-
-```bash
-docker compose up
-```
-
-Or run it in detached mode:
+You can start everything in detached mode:
 
 ```bash
 docker compose up -d
 ```
 
-## Notes on dependency installs
+Or you can run the stack in the foreground:
 
-The frontend and PWA services mount `node_modules` as named volumes for development.
-Their container commands run `yarn install` on startup to populate these volumes.
-
-## Installing requirements for the backend
-Does not install testing stuff (will save space on prod):
 ```bash
-pip install -r app/backend/requirements.txt
+docker compose up
 ```
 
-This is for testing only on local dev (won't be in prod):
+Check the service health:
+
 ```bash
-pip install -r app/backend/requirements-dev.txt
+docker compose ps
 ```
 
-## Verify the services
+## 4. Application Access Points
 
-Once the stack is running, the default ports are:
+| Service | URL / Address | Notes|
+|---|---|---|
+| Frontend web app | http://localhost:3000 | Served **through niginx**, not the frontend container directly — the frontend only exposes port 3000 internally|
+| Backend API docs (Swagger) | http://localhost:8000/docs | Published  directly, bypass nginx |
+| pgAdmin | http://localhost:8080 | |
+| MinIO Console | http://localhost:9001 | |
+| PostgreSQL / PostGIS | localhost:5432 | |
+| Valkey | localhost:6379 | |
 
-- `http://localhost:3000` – frontend web app
-- `http://localhost:8000` – backend API
-- `http://localhost:19006` – PWA / Expo web interface
-- `http://localhost:8080` – pgAdmin
-- `localhost:5432` – PostgreSQL database
-- `http://localhost:8000/docs#` - Swagger Docs
+## 5. Seeding the Database
 
-## Stop the containers
+The `reseed` service is gated behind the `tools` Compose profile, so the profile flag is required even with `run`:
 
-To stop and remove containers, networks, and volumes created by `docker compose up`:
+``bash
+docker compose --profile tools run --rm reseed
+```
+
+This executes in  `app/backend/seed.py --reseed` and removes the runner container on exit.
+
+## 6. Dependency Management
+
+### Frontend
+
+Install pacages inside the running frontend container (it uses an isolated named volume, `frontend_node_modules`):
+
+```bash
+docker compose exec frontend yarn add <package_name>
+docker compose exec frontend yarn add -D <package_name>
+```
+
+### Backend
+
+The production image (`app/backend/Dockerfile`) installs from `requirements.txt` using `pip install --require-hashes --only-binary :all:`. i.e.:
+
+- `requirements.txt` must contain hashes for every package - compiled from `requirements.in`.
+- Every dependency must have a prebuilt wheel available (no source builds in the image)
+
+To add a new production dependency:
+
+1. Add it to `app/backend/requirements,in`.
+2. Regenerate the hashed lockfile:
+
+```bash
+pip-compile --generate-hashes`
+```
+
+3. Rebuild and restart the backend container:
+
+```bash
+docker compose build backend
+docker compose up -d backend
+```
+
+Dev-only dependencies (`app/backend/requirements-dev.in` / `requirements-dev.txt`) - are only installed in the `test` build stage of the Dockerfile to keep production small.
+
+## 7. Running the Test Suites
+
+### Backend
+
+`app/backend/Makefile` wraps a dedicated `backend-test` container, built from  a `test` stage of `app/backend/Dockerfile` that adds dev dependencies on top of the production base.
+
+To run the suites via the Makefile, from `app/backend/`:
+
+```bash 
+make test   # starts test infra, runs pytest in a container
+make lint   # runs pylint in a container
+make shell  # opens a shell in the backens-test container
+make clean  # tears down test infra and volumes
+```
+Run `make help` for the full list of targets.
+
+### Frontend
+
+`app/frontend/Makefile` wraps the Playwright suite, run inside the already-running `frontend` container:
+
+```bash
+make up             # ensures the dev stack's frontend service is up
+make install        # first run only, installs browser binaries
+make test           # runs the suite headlessly
+make test-headless  # runs the suite headed
+make test-report    #opens the last report
+make lint           # eslint (next lint)
+make format-check   # prettier --check
+```
+
+Run `make help` for the full list of targets.
+
+## 8. Maintenance Commands:
+
+View logs for a specific service:
+ 
+```bash
+docker compose logs -f backend
+docker compose logs -f frontend
+```
+
+Stop the stack, keeping data:
 
 ```bash
 docker compose down
 ```
 
-## Useful commands
-
-- Rebuild a single service (for example, backend):
+Stop the stack and wipe all volumes:
 
 ```bash
-docker compose build backend
+docker compose down
 ```
 
-- View logs for all services:
-
-```bash
-docker compose logs -f
-```
-
-- View logs for a specific service (for example, frontend):
-
-```bash
-docker compose logs -f frontend
-```
-
-# Yarn commands
-
-- Run the commands from the root of the repository to execute them in the correct context:
-
-
-- To run from app/backend:
-
-```bash
-yarn test # runs all test files in the tests folder
-yarn start
-yarn dev
-yarn lint   # runs pylint locally
-```
-
-- To run from app/frontend:
-
-```bash
-yarn dev
-yarn build
-yarn start
-yarn lint
-yarn test
-yarn test:headed
-yarn test:report
-yarn test:install
-yarn eslint . --ext .js,.jsx,.ts,.tsx  # for eslint
-```
