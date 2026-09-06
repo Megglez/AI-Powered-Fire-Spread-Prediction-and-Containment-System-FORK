@@ -363,7 +363,7 @@ export function FireMap({lat, lng, drawMode, onDrawComplete, clearDrawings, pred
       style={{ width: '100%', height: '100%' }}
       mapStyle="mapbox://styles/mapbox/navigation-night-v1"
     >
-      <NavigationControl position='bottom-right' showCompass={false}/>
+      <NavigationControl position='top-right' showCompass={false}/>
 
       {activeFires.map((fire) => (
         <Marker
