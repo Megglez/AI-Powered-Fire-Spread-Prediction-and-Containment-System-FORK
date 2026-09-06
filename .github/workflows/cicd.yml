@@ -7,6 +7,9 @@ jobs:
   backend-unit-tests:
     name: Backend Unit Tests
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     env:
       DATABASE_URL: "postgresql://postgres:postgres@localhost:5433/test_fire_db"
       JWT_SECRET_KEY: your-super-secret-key-change-this
@@ -34,6 +37,7 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERAGE_PATH: app/backend/testing
+          SUBPROJECT_ID: unit
 
   backend-integration-tests:
     name: Backend Integration Tests
@@ -104,6 +108,7 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERAGE_PATH: app/backend/testing
+          SUBPROJECT_ID: integration
 
           
 
