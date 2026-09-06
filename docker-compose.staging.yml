@@ -90,7 +90,7 @@ services:
       timeout: 3s
       retries: 5
       start_period: 30s
-    command: ["yarn", "start", "-H", "0.0.0.0", "-p", "3000"]
+    command: ["node", "server.js"]
     environment:
       NODE_ENV: production
       BACKEND_INTERNAL_URL: http://staging-python-backend:8001
