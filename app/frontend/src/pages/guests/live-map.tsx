@@ -1,7 +1,8 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { Map, CircleAlert } from 'lucide-react';
+import Link from 'next/link';
+import { Map, CircleAlert, Plus, LocateFixed } from 'lucide-react';
 import { SideBar } from '../../components/layout/SideBar';
 import { NavLink } from '../../components/layout/NavLink';
 import { GuestEnvironment } from '../../components/guest/GuestEnvironment';
@@ -45,8 +46,8 @@ export default function GuestPublicDashboard() {
         {/* Grid */}
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-3 lg:gap-6">
           {/* Left column */}
-          <div className="xl:col-span-7 flex flex-col gap-3 lg:gap-6">
-            <div className="relative rounded-2xl overflow-hidden border border-carbon-card h-96 sm:h-104 lg:h-132 w-full shadow-md">
+          <div className="xl:col-span-8 flex flex-col gap-3 lg:gap-6">
+            <div className="relative rounded-2xl overflow-hidden border border-carbon-card h-125 sm:h-104 md:h-120 lg:h-137 w-full shadow-md">
               <PublicFireMap
                 lat={location.lat}
                 lng={location.lng}
@@ -57,10 +58,20 @@ export default function GuestPublicDashboard() {
                 onSelectFire={handleSelectFire}
                 onDeselect={clearSelect}
               />
-            </div>
-            <div className="grid grid-col gap-2 lg:grid lg:grid-cols-2 lg:gap-3">
-              <GuestEnvironment data={environmentVariables} />
-              <GuestActions onRecenter={recenter} />
+
+              {/* action buttons */}
+              <div className='absolute top-3 left-3 z-20 flex flex-col gap-2'>
+                <Link href='/guest/report-fire' aria-label='Report a fire' title='Report a fire' className='w-10 h-10 rounded-full bg-primary text-text-primary flex items-center justify-center shadow-lg ring-lg ring-black/10 hover:bg-primary/90 hover:scale-105 active:scale-95 transition-all duration-150'>
+                  <Plus className='w-5 h-5' />
+                </Link>
+                <button type='button' onClick={recenter} aria-label='Recenter map' title='Recenter map' className='w-10 h-10 rounded-full bg-carbon-bg/90 border border-carbon-card text-text-primary flex items-center justify-center shadow-lg backdrop-blur-sm hover:bg-carbon-side hover:scale-105 active:scale-95 transition-all duration-150'>
+                  <LocateFixed className='w-5 h-5' />
+                </button>
+              </div>
+
+              <div className="absolute bottom-0 inset-x-0 z-10 bg-carbon-bg/70 backdrop-blur-md border-t border-carbon-card p-2">
+                <GuestEnvironment data={environmentVariables} />
+              </div>
             </div>
           </div>
 
@@ -70,7 +81,7 @@ export default function GuestPublicDashboard() {
               Nearby Reports
             </h4>
             <div
-              className="rounded-2xl bg-carbon-side/40 backdrop-blur-md border border-carbon-card overflow-y-auto max-h-96 lg:max-h-152"
+              className="rounded-2xl bg-carbon-side/40 backdrop-blur-md border border-carbon-card overflow-y-auto max-h-96"
             >
               <GuestReports reports={reports} selectedFireId={fireId} onSelectFire={handleSelectFire}/>
             </div>
