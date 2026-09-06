@@ -1,10 +1,8 @@
 [run]
-data_file = app/backend/testing/.coverage
+data_file = .coverage
 branch= true
 relative_files = true
-source = 
-    app/backend/src
-    app/backend/ml
+source = app/backend
 
 [paths]
 source =
@@ -17,3 +15,9 @@ omit =
     app/backend/testing/*
     app/backend/seed.py
     app/backend/test_api.py
+    app/backend/ml/training/build_*.py
+    app/backend/ml/training/load_real_dataset.py
+    app/backend/ml/training/synthetic_data.py
+    app/backend/ml/training/train_ignition.py
+    app/backend/src/ai/build_*.py
+    app/backend/src/ai/inspect_fire.py

@@ -29,11 +29,9 @@ jobs:
         env:
           PYTHONPATH: .
         run: |
-          coverage erase --rcfile=app/backend/testing/.coveragerc
+          coverage erase
           pytest -c app/backend/testing/pytest.ini \
-                 --cov=app/backend/src \
-                 --cov=app/backend/ml \
-                 --cov-config=app/backend/testing/.coveragerc \
+                 --cov \
                  --cov-report=term \
                  --cov-report=xml:app/backend/testing/coverage.xml \
                  app/backend/testing/unit
@@ -43,7 +41,7 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SUBPROJECT_ID: unit
-          COVERAGE_PATH: "app/backend/testing"
+          COVERAGE_PATH: "."
 
   backend-integration-tests:
     name: Backend Integration Tests
@@ -109,11 +107,9 @@ jobs:
         env:
           PYTHONPATH: .
         run: |
-          coverage erase --rcfile=app/backend/testing/.coveragerc
+          coverage erase 
           pytest -c app/backend/testing/pytest.ini \
-                 --cov=app/backend/src \
-                 --cov=app/backend/ml \
-                 --cov-config=app/backend/testing/.coveragerc \
+                 --cov \
                  --cov-report=term \
                  --cov-report=xml:app/backend/testing/coverage.xml \
                  app/backend/testing/integration
@@ -123,7 +119,7 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SUBPROJECT_ID: integration
-          COVERAGE_PATH: "app/backend/testing"
+          COVERAGE_PATH: "."
 
           
 
