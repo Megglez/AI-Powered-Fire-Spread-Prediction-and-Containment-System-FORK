@@ -257,11 +257,16 @@ jobs:
           VALKEY_HOST: localhost
           VALKEY_PORT: 6379
         run: |
-          PYTHONPATH=. uvicorn app.backend.main:app --host 0.0.0.0 --port 8000 &
+          PYTHONPATH=. nohup uvicorn app.backend.main:app --host 0.0.0.0 --port 8000 > /tmp/uvicorn.log 2>&1 &
           for i in {1..30}; do
-            curl -sf http://localhost:8000/health > /dev/null && break
+            curl -sf http://127.0.0.1:8000/health > /dev/null && break
             sleep 1
           done
+          if ! curl -sf http://127.0.0.1:8000/health > /dev/null; then
+            echo "backend failed to launch"
+            cat /tmp/uvicorn.log
+            exit 1
+          fi
 
       - name: Set up Node
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 
