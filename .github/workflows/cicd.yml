@@ -26,6 +26,8 @@ jobs:
       - uses: ./.github/actions/setup-backend
       
       - name: Run unit tests
+        env:
+          PYTHONPATH: .
         run: |
           coverage erase --rcfile=app/backend/testing/.coveragerc
           pytest -c app/backend/testing/pytest.ini \
@@ -104,6 +106,8 @@ jobs:
       - uses: ./.github/actions/setup-backend
 
       - name: Run integration tests
+        env:
+          PYTHONPATH: .
         run: |
           coverage erase --rcfile=app/backend/testing/.coveragerc
           pytest -c app/backend/testing/pytest.ini \
