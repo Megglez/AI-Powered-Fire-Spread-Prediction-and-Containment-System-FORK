@@ -117,10 +117,13 @@ test.describe('Unit: probeHealth cahcing and deduplication', () => {
         });
 
         const results = await page.evaluate(async () => {
-            let inflight: Promise<boolean> | null = null;
+            let inflight = null;
 
             async function probe() {
-                if (inflight) return inflight;
+                if (inflight) {
+                    return inflight;
+                }
+
                 inflight = (async () => {
                     try {
                         const res = await fetch('/health');
@@ -129,7 +132,8 @@ test.describe('Unit: probeHealth cahcing and deduplication', () => {
                         inflight = null;
                     }
                 })();
-                return inflight;
+
+                return inflight;                
             }
             
             return Promise.all([
