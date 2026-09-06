@@ -35,6 +35,11 @@ services:
     image: ${BACKEND_IMAGE}
     ports: []
     restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_started
     deploy:
       resources:
         limits:
@@ -90,7 +95,7 @@ services:
       NODE_ENV: production
       BACKEND_INTERNAL_URL: http://staging-python-backend:8001
 
-  gateway:
+  caddy:
     image: caddy:2-alpine@sha256:5f5c8640aae01df9654968d946d8f1a56c497f1dd5c5cda4cf95ab7c14d58648
     container_name: caddy-staging
     restart: always
