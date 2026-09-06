@@ -29,7 +29,9 @@ jobs:
         run: |
           coverage erase
           pytest -c app/backend/testing/pytest.ini \
-                 --cov=app/backend --cov-report=xml \
+                 --cov=app/backend \
+                 --cov-config=app/backend/testing/.coveragerc \
+                 --cov-report=xml:app/backend/testing/coverage.xml \
                  app/backend/testing/unit
       
       - name: Post coverage comment
@@ -42,6 +44,9 @@ jobs:
   backend-integration-tests:
     name: Backend Integration Tests
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     services:
       postgres:
         image: postgis/postgis@sha256:a2fc46b52819d25add4ed93d3da83e106e17ea3ace6883cce3791631c9820bb2
@@ -100,7 +105,9 @@ jobs:
         run: |
           coverage erase
           pytest -c app/backend/testing/pytest.ini \
-                 --cov=app/backend --cov-report=xml \
+                 --cov=app/backend \
+                 --cov-config=app/backend/testing/.coveragerc \
+                 --cov-report=xml:app/backend/testing/coverage.xml \
                  app/backend/testing/integration
 
       - name: Post coverage comment
