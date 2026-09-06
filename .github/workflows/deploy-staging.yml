@@ -54,6 +54,7 @@ jobs:
               with:
                 context: ./app/backend
                 push: true
+                no-cache: true
                 tags: ${{ env.ECR_REGISTRY }}/${{ env.BACKEND_REPO }}:${{ steps.vars.outputs.image_tag }}
                 
             - name: Build and push frontend
