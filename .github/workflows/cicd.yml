@@ -40,6 +40,7 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SUBPROJECT_ID: unit
+          COVERAGE_PATH: "app/backend/testing"
 
   backend-integration-tests:
     name: Backend Integration Tests
@@ -116,6 +117,7 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SUBPROJECT_ID: integration
+          COVERAGE_PATH: "app/backend/testing"
 
           
 
