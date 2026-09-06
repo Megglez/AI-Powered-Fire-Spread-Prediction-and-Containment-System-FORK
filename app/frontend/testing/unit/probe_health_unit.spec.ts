@@ -108,7 +108,9 @@ test.describe('Unit: probeHealth cahcing and deduplication', () => {
 
         await page.route('**/health', async (route: Route) => {
             networkRequestCount += 1;
-            await new Promise((resolve) => setTimeout(resolve, 80));
+            await new Promise<void>((resolve) => {
+                setTimeout(resolve, 100)
+            });
             await route.fulfill({
                 status: 200,
                 contentType: 'application/json',
