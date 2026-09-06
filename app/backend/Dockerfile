@@ -4,13 +4,13 @@
 FROM python:3.12-slim@sha256:dd29372629eeba2dd003fd9e9d35a5b8236c44727875a0364254b5127af88e65 AS base
 
 # Install UV from official standalone binary
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
+COPY --from=ghcr.io/astral-sh/uv:0.5.11 /uv /bin/uv
 
 WORKDIR /app
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PYTHONPATH=/app/src:/app \
+    PYTHONPATH=/app \
     UV_COMPILE_BYTECODE=1
 
 # Layer base lockfile early for docker caching
@@ -37,6 +37,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     --index-strategy unsafe-first-match \
     -r requirements-dev.txt
 
+COPY app/__init__.py    /app/app/__init__.py
 EXPOSE 8000
 
 CMD ["uvicorn", "app.backend.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
@@ -47,8 +48,13 @@ CMD ["uvicorn", "app.backend.main:app", "--host", "0.0.0.0", "--port", "8000", "
 
 FROM base AS prod 
 
-COPY app/backend app/app/backend
-COPY app/ml app/app/ml
+RUN useradd -r -u 10001 -g users -s /usr/sbin/nologin appuser
+
+COPY app/__init__.py    /app/app/__init__.py
+COPY app/artifact_store /app/app/artifact_store
+COPY app/backend        /app/app/backend
+
+USER appuser
 
 EXPOSE 8000
 

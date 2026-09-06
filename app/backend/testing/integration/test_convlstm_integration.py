@@ -5,9 +5,9 @@ import numpy as np
 import pytest
 from torch.utils.data import DataLoader
 
-from app.ml.models.nowcast_model import WeatherDeltaModel, WeatherDeltaModelConfig
-from app.ml.training.dataset import WeatherDatasetSplitConfig, WeatherRolloutDataset
-from app.ml.training.train_convlstm import TrainConfig, Trainer, build_normalizers
+from app.backend.ml.models.nowcast_model import WeatherDeltaModel, WeatherDeltaModelConfig
+from app.backend.ml.training.dataset import WeatherDatasetSplitConfig, WeatherRolloutDataset
+from app.backend.ml.training.train_convlstm import TrainConfig, Trainer, build_normalizers
 
 
 @pytest.fixture

@@ -21,7 +21,7 @@ for cand in (here.parents[2] / "backend_src", here.parents[2]):
 
 from ai.schema import FEATURES, SCHEMA_VERSION
 from ai import artifact_store
-from training.synthetic_data import generate_synthetic_dataset, SynthConfig
+from app.backend.ml.training.synthetic_data import generate_synthetic_dataset, SynthConfig
 
 
 # Load data
