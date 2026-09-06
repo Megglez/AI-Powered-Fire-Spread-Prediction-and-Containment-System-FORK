@@ -117,7 +117,7 @@ jobs:
       - uses: ./.github/actions/setup-backend
 
       - name: Run pylint
-        run: PYTHONPATH=. pylint --recursive=y app --fail-under=8.0
+        run: PYTHONPATH=. pylint --rcfile=app/backend/.pylintrc --recursive=y app --fail-under=8.0
 
   frontend-build:
     name: Frontend Build
