@@ -1,8 +1,18 @@
 [run]
-data_file = .coverage
-source = 
-    app/backend
+data_file = app/backend/testing/.coverage
+branch= true
 relative_files = true
+source = 
+    app/backend/src
+    app/backend/ml
+
+[paths]
+source =
+    app/backend
+    /github/workspace/app/backend
+
+[report]
+show_missing = true
 omit = 
     app/backend/testing/*
     app/backend/seed.py
