@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import Image from 'next/image';
 import { apiCall } from '../lib/api';
-
+import PasswordInput from '../components/shared/PasswordInput';
 
 interface ResetPasswordRequest {
     token: string;
@@ -111,16 +111,15 @@ export default function ResetPasswordPage() {
                                 <label htmlFor="password" className="block text-sm text-white/60 mb-1">
                                     New password
                                 </label>
-                                <input
+                                <PasswordInput
                                     id="password"
-                                    type="password"
-                                    placeholder="Min 8 chars, 1 uppercase, 1 number"
-                                    className={fieldClass(errors.password)}
                                     value={password}
                                     onChange={(e) => {
                                         setPassword(e.target.value);
                                         setErrors((prev) => ({ ...prev, password: undefined }));
                                     }}
+                                    placeholder="Enter your password"
+                                    error={errors.password}
                                 />
                                 {errors.password && <p className="text-flare text-xs mt-1">{errors.password}</p>}
                             </div>

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { apiCall } from '../lib/api';
 import { useAuth } from '../hooks/useAuth';
-
+import PasswordInput from '../components/shared/PasswordInput';
 function validateEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
@@ -154,16 +154,15 @@ export default function Login() {
               <label htmlFor="password" className="block text-sm text-white/60 mb-1">
                 Password
               </label>
-              <input
+              <PasswordInput
                 id="password"
-                type="password"
-                placeholder="••••••••"
-                className={fieldClass(errors.password)}
                 value={password}
                 onChange={(e) => {
                   setPassword(e.target.value);
                   setErrors((prev) => ({ ...prev, password: undefined }));
                 }}
+                placeholder="Enter your password"
+                error={errors.password}
               />
               {errors.password && <p className="text-flare text-xs mt-1">{errors.password}</p>}
             </div>
