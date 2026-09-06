@@ -3,10 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "test:backend": "cd ../.. && PYTHONPATH=app/backend/src:. pytest app/backend/testing",
-    "test:local": "SKIP_DB_INIT=1 SKIP_SEED=1 pytest",
-    "test:coverage": "pytest --cov",
-    "test:xgboost:unit": "pytest app/backend/src/tests/test_xgboost_model_unit.py -v ",
-    "lint": "PYTHONPATH=src:. pylint --recursive=y ."
+    "test:up": "docker compose -f ../../docker-compose.test.yml up -d test-db test-minio",
+    "test": "yarn test:up && docker compose -f ../../docker-compose.test.yml run --rm backend-test",
+    "test:local": "yarn test:up && docker compose -f ../../docker-compose.test.yml run --rm -e SKIP_DB_INIT=1 -e SKIP_SEED=1 backend-test",
+    "test:coverage": "yarn test:up && docker compose -f ../../docker-compose.test.yml run --rm backend-test pytest --cov",
+    "test:xgboost:unit": "yarn test:up && docker compose -f ../../docker-compose.test.yml run --rm backend-test pytest app/backend/testing/unit/test_xgboost_model_unit.py -v",
+    "lint": "yarn test:up && docker compose -f ../../docker-compose.test.yml run --rm backend-test pylint --recursive=y .",
+    "shell": "yarn test:up && docker compose -f ../../docker-compose.test.yml run --rm backend-test bash",
+    "test:down": "docker compose -f ../../docker-compose.test.yml down",
+    "clean": "docker compose -f ../../docker-compose.test.yml down -v"
   }
 }

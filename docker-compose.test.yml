@@ -53,3 +53,18 @@ services:
       test-minio:
         condition: service_healthy
     command: ["pytest", "app/backend/testing"]
+
+  frontend-test-runner:
+    build:
+      context: ./app/frontend
+      dockerfile: Dockerfile.test
+    container_name: fireaway_frontend_test
+    environment:
+      NODE_ENV: test
+    volumes:
+      - ./app/frontend:/app
+      - frontend_test_node_modules:/app/node_modules
+    command: ["yarn", "test"]
+
+volumes:
+  frontend_test_node_modules:
