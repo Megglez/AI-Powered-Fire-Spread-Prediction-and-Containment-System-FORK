@@ -1,3 +1,9 @@
 [run]
 data_file = .coverage
+source = 
+    app/backend
 relative_files = true
+omit = 
+    app/backend/testing/*
+    app/backend/seed.py
+    app/backend/test_api.py
