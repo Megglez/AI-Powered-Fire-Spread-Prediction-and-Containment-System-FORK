@@ -271,8 +271,8 @@ def load_static_grids_for_fire(
     manifest_row: dict, min_lon, min_lat, max_lon, max_lat, target_shape
 ) -> dict[str, np.ndarray]:
     """Uses static feature code"""
-    from app.ml.features.fuel_load import process_sentinal2_and_worldcover
-    from app.ml.features.terrain import extract_terrain_features
+    from app.backend.ml.features.fuel_load import process_sentinal2_and_worldcover
+    from app.backend.ml.features.terrain import extract_terrain_features
 
     veg = process_sentinal2_and_worldcover(
         b04_path=manifest_row["b04_path"],

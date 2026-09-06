@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { headers } from 'next/headers';
 import { useRouter } from 'next/router';
 import { NavLink } from './NavLink';
-import { logout } from '../../lib/api';
+import { logout } from '@/lib/api';
 
 export function SideBar({
   items,
