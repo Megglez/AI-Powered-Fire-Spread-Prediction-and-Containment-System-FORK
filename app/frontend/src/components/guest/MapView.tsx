@@ -23,10 +23,10 @@ export default function MapView() {
       <PageHeader title="Incident Map" subtitle="Public Fire Map View" showIcons />
 
       {/* Grid */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
-        <div className="xl:col-span-7 flex flex-col gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+        <div className="xl:col-span-8 flex flex-col gap-6">
           {/* Map */}
-          <div className="relative rounded-2xl overflow-hidden border border-carbon-card h-96 sm:h-104 lg:h-132 w-full shadow-md">
+          <div className="relative rounded-2xl overflow-hidden border border-carbon-card h-96 sm:h-104 lg:h-140 w-full shadow-md">
             <PublicFireMap
               lat={userLocation.lat}
               lng={userLocation.lng}
@@ -48,9 +48,7 @@ export default function MapView() {
 
           {/* Enforces strict scrolling constraints tailored to Ryan's height layout tree */}
           <div
-            className="rounded-2xl bg-carbon-side/40 backdrop-blur-md border border-carbon-card overflow-y-auto"
-            style={{ maxHeight: 'calc(480px + 2rem + 140px)' }}
-          >
+            className="rounded-2xl bg-carbon-side/40 backdrop-blur-md border border-carbon-card overflow-y-auto max-h-130">
             <NearbyReports nearbyFires={nearbyFires}  selectedFireId={fireLocation} onSelectFire={handleSelectFire}/>
           </div>
         </div>

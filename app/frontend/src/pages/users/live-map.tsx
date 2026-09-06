@@ -33,7 +33,7 @@ export default function RegisteredUserDashboard() {
             />
           </MapPanel>
 
-          <SidePanelRight title="Nearby Reports" colSpan={4} maxHeight="calc(480px + 2rem + 197px)">
+          <SidePanelRight title="Nearby Reports" colSpan={4} maxHeight="24rem">
             <NearbyReports nearbyFires={nearbyFires} selectedFireId={fireLocation} onSelectFire={handleSelectFire} />
           </SidePanelRight>
         </div>

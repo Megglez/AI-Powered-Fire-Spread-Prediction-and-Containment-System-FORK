@@ -40,7 +40,7 @@ export default function FirefighterDashboard() {
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-3 md:gap-4 xl:grid-rows-1">
           <div className="xl:col-span-8 flex flex-col gap-3 md:gap-4">
             {/* Map */}
-            <div className="rounded-2xl bg-carbon-side/40 border border-carbon-stroke backdrop-blur-sm flex flex-col overflow-hidden relative shadow-2xl shadow-black/20 h-96 sm:h-104 md:h-120">
+            <div className="rounded-2xl bg-carbon-side/40 border border-carbon-stroke backdrop-blur-sm flex flex-col overflow-hidden relative shadow-2xl shadow-black/20 h-96 sm:h-104 md:h-136">
               <div className="p-3 md:p-4 border-b border-carbon-card bg-carbon-bg/50 backdrop-blur-md absolute top-0 w-full z-10 flex justify-between items-center border-l-2 border-l-ignite/60">
                 <span className="font-bold text-sm md:text-m tracking-wide text-text-primary/80">
                   LIVE FIRE MAP
