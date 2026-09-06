@@ -256,6 +256,8 @@ jobs:
           JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY || 'ci-test-key'}}
           VALKEY_HOST: localhost
           VALKEY_PORT: 6379
+          SEED_DEFAULT_PASSWORD: ${{ secrets.SEED_DEFAULT_PASSWORD }}
+          SEED_ADMIN_PASSWORD: ${{ secrets.SEED_ADMIN_PASSWORD }}
         run: |
           PYTHONPATH=. nohup uvicorn app.backend.main:app --host 0.0.0.0 --port 8000 > /tmp/uvicorn.log 2>&1 &
           for i in {1..30}; do
