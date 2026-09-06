@@ -2,16 +2,19 @@
 
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
+import { useState } from 'react';
 import { Map, CircleAlert, Plus, LocateFixed } from 'lucide-react';
 import { SideBar } from '../../components/layout/SideBar';
 import { NavLink } from '../../components/layout/NavLink';
 import { GuestEnvironment } from '../../components/guest/GuestEnvironment';
-import { GuestReports } from '../../components/guest/GuestReports';
-import { GuestActions } from '../../components/guest/GuestActions';
+import { useFireSelect } from '../../hooks/useFireSelect';
 import { useGuestDashboard } from '../../hooks/useGuestDashboard';
 import { PageHeader } from '../../components/layout/pageHeader';
 import { NotificationToastHost } from '../../components/notification/NotificationToastHost';
-import { useFireSelect } from '../../hooks/useFireSelectGuest';
+import { NearbyReports } from '../../components/shared/nearbyReports';
+import { useNearbyFires } from '../../hooks/useNearbyFires';
+
+import React from 'react';
 
 const PublicFireMap = dynamic(
   () => import('../../components/firefighter/FireMap').then((mod) => mod.FireMap),
@@ -27,7 +30,14 @@ const PublicFireMap = dynamic(
 
 export default function GuestPublicDashboard() {
   const { location, environmentVariables, reports, recenter } = useGuestDashboard(20);
-  const { fireId, handleSelectFire, clearSelect } = useFireSelect();
+  const { fireLocation, handleSelectFire, clearSelect } = useFireSelect();
+  const [recenterCount, setRecenterCount] = useState(0);
+  const { userLocation, nearbyFires } = useNearbyFires();
+
+  const handleRecenter = () => {
+    recenter();
+    setRecenterCount((c) => c + 1);
+  };
 
   const guestNavItems = (
     <>
@@ -54,17 +64,18 @@ export default function GuestPublicDashboard() {
                 drawMode={false}
                 onDrawComplete={() => {}}
                 clearDrawings={0}
-                selectedFireId={fireId}
+                recenter={recenterCount}
+                selectedFireId={fireLocation}
                 onSelectFire={handleSelectFire}
                 onDeselect={clearSelect}
               />
 
               {/* action buttons */}
               <div className='absolute top-3 left-3 z-20 flex flex-col gap-2'>
-                <Link href='/guest/report-fire' aria-label='Report a fire' title='Report a fire' className='w-10 h-10 rounded-full bg-primary text-text-primary flex items-center justify-center shadow-lg ring-lg ring-black/10 hover:bg-primary/90 hover:scale-105 active:scale-95 transition-all duration-150'>
+                <Link href='/guests/report-fire' aria-label='Report a fire' title='Report a fire' className='w-10 h-10 rounded-full bg-primary text-text-primary flex items-center justify-center shadow-lg ring-lg ring-black/10 hover:bg-primary/90 hover:scale-105 active:scale-95 transition-all duration-150'>
                   <Plus className='w-5 h-5' />
                 </Link>
-                <button type='button' onClick={recenter} aria-label='Recenter map' title='Recenter map' className='w-10 h-10 rounded-full bg-carbon-bg/90 border border-carbon-card text-text-primary flex items-center justify-center shadow-lg backdrop-blur-sm hover:bg-carbon-side hover:scale-105 active:scale-95 transition-all duration-150'>
+                <button type='button' onClick={handleRecenter} aria-label='Recenter map' title='Recenter map' className='w-10 h-10 rounded-full bg-carbon-bg/90 border border-carbon-card text-text-primary flex items-center justify-center shadow-lg backdrop-blur-sm hover:bg-carbon-side hover:scale-105 active:scale-95 transition-all duration-150'>
                   <LocateFixed className='w-5 h-5' />
                 </button>
               </div>
@@ -81,9 +92,8 @@ export default function GuestPublicDashboard() {
               Nearby Reports
             </h4>
             <div
-              className="rounded-2xl bg-carbon-side/40 backdrop-blur-md border border-carbon-card overflow-y-auto max-h-96"
-            >
-              <GuestReports reports={reports} selectedFireId={fireId} onSelectFire={handleSelectFire}/>
+              className="rounded-2xl bg-carbon-side/40 backdrop-blur-md border border-carbon-card overflow-y-auto max-h-130">
+              <NearbyReports nearbyFires={nearbyFires}  selectedFireId={fireLocation} onSelectFire={handleSelectFire}/>
             </div>
           </div>
         </div>

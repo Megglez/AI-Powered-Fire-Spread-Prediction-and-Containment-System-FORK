@@ -84,15 +84,15 @@ export default function FirefighterDashboard() {
           </div>
 
           {/* Right Column */}
-          <div className="xl:col-span-4 flex flex-col gap-3" style={{ maxHeight: '100%' }}>
-            <h3 className="font-bold tracking-widest text-text-muted uppercase shrink-0">
-              Nearby Reports
-            </h3>
-            <div
-              className="rounded-2xl bg-carbon-side/40 border border-carbon-card overflow-y-auto max-h-96">
-              <NearbyReports nearbyFires={nearbyFires} selectedFireId={fireLocation} onSelectFire={handleSelectFire} />
+          <div className="xl:col-span-4 flex flex-col gap-3 h-full">
+              <h4 className=" text-text-muted uppercase">
+                Nearby Reports
+              </h4>
+              <div
+                className="rounded-2xl bg-carbon-side/40 backdrop-blur-md border border-carbon-card overflow-y-auto max-h-130">
+                <NearbyReports nearbyFires={nearbyFires}  selectedFireId={fireLocation} onSelectFire={handleSelectFire}/>
+              </div>
             </div>
-          </div>
         </div>
       </div>
     </FirefighterSideBar>
