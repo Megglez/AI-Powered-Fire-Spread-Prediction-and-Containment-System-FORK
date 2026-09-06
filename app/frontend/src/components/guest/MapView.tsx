@@ -1,9 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
+import Link from 'next/link';
+import { Plus, LocateFixed } from 'lucide-react';
 import dynamic from 'next/dynamic';
-import { useFireSelect } from '@/hooks/useFireSelect';
+import { useFireSelect } from '../../hooks/useFireSelect';
 import { useNearbyFires } from '../../hooks/useNearbyFires';
 import { NearbyReports } from '../shared/nearbyReports';
 import { PageHeader } from '../layout/pageHeader';
+import { GuestEnvironment } from './GuestEnvironment';
+import { useGuestDashboard } from '../../hooks/useGuestDashboard';
 
 const PublicFireMap = dynamic(() => import('../firefighter/FireMap').then((mod) => mod.FireMap), {
   ssr: false,
@@ -16,7 +20,16 @@ const PublicFireMap = dynamic(() => import('../firefighter/FireMap').then((mod) 
 
 export default function MapView() {
   const { userLocation, nearbyFires } = useNearbyFires();
+  const { environmentVariables, recenter } = useGuestDashboard(20);
   const{ fireLocation, handleSelectFire, clearSelect } = useFireSelect();
+  const [recenterCount, setRecenterCount] = useState(0);
+
+  const handleRecenter = () => {
+    recenter();
+    setRecenterCount((c) => c + 1);
+  };
+
+
   return (
     <div className="flex flex-col p-2">
       {/* Public View Header */}
@@ -33,15 +46,28 @@ export default function MapView() {
               drawMode={false}
               onDrawComplete={() => {}}
               clearDrawings={0}
+              recenter={recenterCount}
               selectedFireLocation={fireLocation}
               onSelectFire={handleSelectFire}
               onDeselect={clearSelect}
             />
+          <div className='absolute top-3 left-3 z-20 flex flex-col gap-2'>
+              <Link href='/admin/report-fire' aria-label='Report a fire' title='Report a fire' className='w-10 h-10 rounded-full bg-primary text-text-primary flex items-center justify-center shadow-lg ring-lg ring-black/10 hover:bg-primary/90 hover:scale-105 active:scale-95 transition-all duration-150'>
+                <Plus className='w-5 h-5' />
+              </Link>
+              <button type='button' onClick={handleRecenter} aria-label='Recenter map' title='Recenter map' className='w-10 h-10 rounded-full bg-carbon-bg/90 border border-carbon-card text-text-primary flex items-center justify-center shadow-lg backdrop-blur-sm hover:bg-carbon-side hover:scale-105 active:scale-95 transition-all duration-150'>
+                <LocateFixed className='w-5 h-5' />
+              </button>
+            </div>
+
+            <div className="absolute bottom-0 inset-x-0 z-10 bg-carbon-bg/70 backdrop-blur-md border-t border-carbon-card p-2">
+              <GuestEnvironment data={environmentVariables} />
+            </div>
           </div>
         </div>
 
         {/* Right Column Area (span-4: Scrolling Incident Feed Records) */}
-        <div className="xl:col-span-4 flex flex-col gap-3">
+        <div className="xl:col-span-4 flex flex-col gap-3 h-full">
           <h4 className="tracking-widest text-text-muted uppercase">
             Nearby Reports
           </h4>

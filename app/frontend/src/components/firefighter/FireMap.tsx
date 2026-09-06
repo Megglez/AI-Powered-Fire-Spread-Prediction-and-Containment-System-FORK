@@ -33,6 +33,7 @@ interface MapProps{
     onContainmentChange?: (wktLines: string[]) => void;
     clearDrawings: number;
     burnGrid?: number[] | null;
+    recenter?: number;
     predictions?: Prediction[];
     currentTick?: number;
     selectedFireLocation?: string | null;
@@ -42,7 +43,7 @@ interface MapProps{
     showKey?: boolean;
 }
 
-export function FireMap({lat, lng, drawMode, onDrawComplete, clearDrawings, predictions = [], currentTick=0, onDeselect = undefined, selectedFireId = null,selectedFireLocation = null, onSelectFire = undefined, showKey = false, onContainmentChange = undefined}: MapProps) {
+export function FireMap({lat, lng, drawMode, onDrawComplete, clearDrawings, recenter = 0, predictions = [], currentTick=0, onDeselect = undefined, selectedFireId = null,selectedFireLocation = null, onSelectFire = undefined, showKey = false, onContainmentChange = undefined}: MapProps) {
 
   const mapRef = useRef<MapRef | null>(null);
   const drawRef = useRef<MapboxDraw | null>(null);
@@ -51,7 +52,6 @@ export function FireMap({lat, lng, drawMode, onDrawComplete, clearDrawings, pred
   const [activeFires, setActiveFires] = useState<FirefighterReportTable[]>([]);
   const [viewState, setViewState] = useState({ longitude: lng, latitude: lat, zoom: 12 });
   const [selectedFire, setSelectedFire] = useState<FirefighterReportTable | null>(null);
-
   const storageKey = 'containment_lines_active';
 
   const [containmentLine, setContainmentLine] = useState<SavedContainmentLine[]>(() => {
@@ -325,6 +325,11 @@ export function FireMap({lat, lng, drawMode, onDrawComplete, clearDrawings, pred
         }
         return features;
     }, [predictions, currentTick])
+
+    useEffect(() => {
+      if (recenter === 0) return;
+      setViewState((v) => ({ ...v, longitude: lng, latitude: lat, zoom: Math.max(v.zoom, 13) }));
+    }, [recenter]);
 
   return (
     <div className='relative w-full h-full'>
