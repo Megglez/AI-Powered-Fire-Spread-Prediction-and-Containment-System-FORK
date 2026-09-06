@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.backend.src.dependencies.auth import ACCESS_TOKEN_EXPIRE_MINUTES
 from app.backend.db import get_db
 from app.backend.src.schemas.auth import (
+    MeResponse,
     LoginResponse,
     Two_FA_Create_Response,
     Two_FA_Verify_Request,
@@ -23,7 +24,7 @@ def setup_2fa_route(username: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail=str(err))
 
 
-@router.post("/verify-2fa", response_model=LoginResponse)
+@router.post("/verify-2fa", response_model=MeResponse)
 def verify_2fa_route(
     request: Two_FA_Verify_Request,
     response: Response,
