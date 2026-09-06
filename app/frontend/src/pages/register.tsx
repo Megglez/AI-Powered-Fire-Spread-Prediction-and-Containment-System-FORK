@@ -262,13 +262,13 @@ export default function Register() {
                 Confirm Password
               </label>
               <PasswordInput
-                id=" Confirm password"
-                name="Confirm password"
-                placeholder="Min 8 chars, 1 uppercase, 1 number"
-                value={form.password}
+                id="confirmPassword"
+                name="confirmPassword"
+                placeholder="Repeat password"
+                value={form.confirmPassword}
                 onChange={handleChange}
                 autoComplete="new-password"
-                className={`${fieldClass(errors.password)} pr-10`}
+                className={`${fieldClass(errors.confirmPassword)} pr-10`}
               />
               {errors.confirmPassword && (
                 <p className="text-flare text-xs mt-1">{errors.confirmPassword}</p>
