@@ -44,7 +44,7 @@ export function useContainmentLine(onDraw?: () => void) {
 
   const deleteLine = useCallback(async (lineId: string): Promise<void> => {
     await apiCall(`/api/firefighter/containment-line/${encodeURIComponent(lineId)}`, 'DELETE')
-  })
+  }, [])
 
   return { submitLine, fetchLines, loading, error, deleteLine};
 
