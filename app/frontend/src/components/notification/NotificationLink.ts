@@ -1,13 +1,17 @@
 import type { UserRole } from '../../types/User';
 
 export function NotificationLink(fireId: string, role: UserRole | null): string {
-  if (role === 'admin') {
-    return `/admin/live-map?fire=${fireId}`;
-  }
-  if (role === 'firefighter') {
-    return `/firefighter/dashboard?fire=${fireId}`;
-  }
-  return `/users/live-map?fire=${fireId}`;
+  let path: string;
 
-  return `/guests/live-map?fire=${fireId}`;
+  if (role === 'admin') {
+    path = `/admin/live-map?fire=${fireId}`;
+  } else if (role === 'firefighter') {
+    path = `/firefighter/dashboard?fire=${fireId}`;
+  } else if (role == 'user') {
+    path = `/users/live-map?fire=${fireId}`;
+  } else {
+    path = `/guests/live-map?fire=${fireId}`;
+  }
+
+  return path;
 }

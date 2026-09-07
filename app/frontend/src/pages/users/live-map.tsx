@@ -8,11 +8,12 @@ import { MapPanel } from '../../components/users/mapPanel';
 import { SidePanelRight } from '../../components/users/sidePanelRight';
 import { FireMap } from '../../components/shared/DynamicFirefighterMap';
 import { NotificationToastHost } from '../../components/notification/NotificationToastHost';
+import { useMapLink } from '../../hooks/useMapLink';
 
 export default function RegisteredUserDashboard() {
   const { userLocation, nearbyFires } = useNearbyFires();
   const { fireLocation, handleSelectFire, clearSelect } = useFireSelect();
-
+  useMapLink(handleSelectFire);
   return (
     <UserSideBar>
       <div className="flex flex-col px-2 py-2 ">
@@ -30,6 +31,7 @@ export default function RegisteredUserDashboard() {
               selectedFireLocation={fireLocation}
               onSelectFire={handleSelectFire}
               onDeselect={clearSelect}
+              selectedFireId={fireLocation}
             />
           </MapPanel>
 

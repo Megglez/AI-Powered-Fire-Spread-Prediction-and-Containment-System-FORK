@@ -8,6 +8,7 @@ import { NearbyReports } from '../shared/nearbyReports';
 import { PageHeader } from '../layout/pageHeader';
 import { GuestEnvironment } from './GuestEnvironment';
 import { useGuestDashboard } from '../../hooks/useGuestDashboard';
+import { useMapLink } from '@/hooks/useMapLink';
 
 const PublicFireMap = dynamic(() => import('../firefighter/FireMap').then((mod) => mod.FireMap), {
   ssr: false,
@@ -28,6 +29,7 @@ export default function MapView() {
     recenter();
     setRecenterCount((c) => c + 1);
   };
+  useMapLink(handleSelectFire);
 
 
   return (
@@ -50,6 +52,7 @@ export default function MapView() {
               selectedFireLocation={fireLocation}
               onSelectFire={handleSelectFire}
               onDeselect={clearSelect}
+              selectedFireId={fireLocation}
             />
           <div className='absolute top-3 left-3 z-20 flex flex-col gap-2'>
               <Link href='/admin/report-fire' aria-label='Report a fire' title='Report a fire' className='w-10 h-10 rounded-full bg-primary text-text-primary flex items-center justify-center shadow-lg ring-lg ring-black/10 hover:bg-primary/90 hover:scale-105 active:scale-95 transition-all duration-150'>

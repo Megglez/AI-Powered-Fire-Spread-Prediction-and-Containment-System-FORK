@@ -18,7 +18,6 @@ import { probeHealth } from '../../lib/offline/shared';
 import type { ReportStatus } from '../../types/Report';
 import { useUpdateUserLocation } from '../../hooks/useUpdateUserLocation';
 
-
 interface SavedContainmentLine {
   id: string;
   wkt: string;
@@ -48,6 +47,7 @@ export function FireMap({lat, lng, drawMode, onDrawComplete, clearDrawings, rece
   const mapRef = useRef<MapRef | null>(null);
   const drawRef = useRef<MapboxDraw | null>(null);
 
+
   const { reports: fires } = useFirefighterReports(''); // no search — just the full nearby fires list for the map
   const [activeFires, setActiveFires] = useState<FirefighterReportTable[]>([]);
   const [viewState, setViewState] = useState({ longitude: lng, latitude: lat, zoom: 12 });
@@ -63,6 +63,7 @@ export function FireMap({lat, lng, drawMode, onDrawComplete, clearDrawings, rece
       return [];
     }
   });
+
 
   useEffect(() => {
     try{
@@ -103,7 +104,7 @@ export function FireMap({lat, lng, drawMode, onDrawComplete, clearDrawings, rece
 
         setActiveFires(verifiedFires);
         const mapped: FireReportMapResponse[] = fires.map((f) => ({
-          id: f.ref,
+          id: f.id,
           reference_number: f.ref,
           lat: f.lat,
           lng: f.lng,
@@ -127,6 +128,7 @@ export function FireMap({lat, lng, drawMode, onDrawComplete, clearDrawings, rece
           );
           setActiveFires(
             verifiedCached.map((c) => ({
+              id: c.id,
               ref: c.reference_number,
               location: c.location_text,
               status: c.status as ReportStatus,
@@ -139,6 +141,7 @@ export function FireMap({lat, lng, drawMode, onDrawComplete, clearDrawings, rece
               lat: c.lat,
               lng: c.lng,
             }))
+
           );
         }
       }
@@ -250,7 +253,7 @@ export function FireMap({lat, lng, drawMode, onDrawComplete, clearDrawings, rece
 
   useEffect(() => {
     if (!selectedFireId && !selectedFireLocation) return;
-    const fire = activeFires.find((f) => (selectedFireId && f.ref === selectedFireId) || (selectedFireLocation && f.location === selectedFireLocation));
+    const fire = activeFires.find((f) => (selectedFireId && f.id === selectedFireId) || (selectedFireLocation && f.location === selectedFireLocation));
     if (!fire) return;
     setViewState((v) => ({
       ...v,
@@ -265,7 +268,7 @@ export function FireMap({lat, lng, drawMode, onDrawComplete, clearDrawings, rece
       setSelectedFire(null);
       return;
     }
-    const fire = activeFires.find((f) => (selectedFireId && f.ref === selectedFireId) || (selectedFireLocation && f.location === selectedFireLocation));
+    const fire = activeFires.find((f) => (selectedFireId && f.id === selectedFireId) || (selectedFireLocation && f.location === selectedFireLocation));
     setSelectedFire(fire ?? null);
   }, [selectedFireId, selectedFireLocation, activeFires]);
 
@@ -372,24 +375,24 @@ export function FireMap({lat, lng, drawMode, onDrawComplete, clearDrawings, rece
 
       {activeFires.map((fire) => (
         <Marker
-          key={fire.ref}
+          key={fire.id}
           longitude={fire.lng}
           latitude={fire.lat}
           anchor="center"
           onClick={(e) => {
             e.originalEvent.stopPropagation();
             setSelectedFire(fire);
-            onSelectFire?.(fire.ref);
+            onSelectFire?.(fire.id);
           }}
         >
           <div className="relative flex items-center justify-center size-6">
             {/* The radar ping animation effect */}
             <span
-              className={`animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75 ${fire.ref === selectedFireId ? '' : 'hidden'}`}
+              className={`animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75 ${fire.id === selectedFireId ? '' : 'hidden'}`}
             />
             {/* The solid core so the marker remains visible */}
             <span
-              className={`relative inline-flex rounded-full size-3 bg-accent shadow-lg shadow-black ${fire.ref === selectedFireId ? 'bg-flare ring-2 ring-white' : 'bg-accent'}`}
+              className={`relative inline-flex rounded-full size-3 bg-accent shadow-lg shadow-black ${fire.id === selectedFireId ? 'bg-flare ring-2 ring-white' : 'bg-accent'}`}
             />
           </div>
         </Marker>

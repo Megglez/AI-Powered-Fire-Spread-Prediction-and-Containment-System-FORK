@@ -12,6 +12,7 @@ import { useRotate } from '../../hooks/useRotate';
 import { PageHeader } from '../../components/layout/pageHeader';
 import { NotificationToastHost } from '../../components/notification/NotificationToastHost';
 import { RotateHint } from '../../components/shared/RotateHint';
+import { useMapLink } from '../../hooks/useMapLink';
 
 export default function FirefighterDashboard() {
   const [drawMode, setDrawMode] = useState(false);
@@ -24,7 +25,7 @@ export default function FirefighterDashboard() {
     loading: savingLine,
     error: lineError,
   } = useContainmentLine(() => setDrawMode(false));
-
+  useMapLink(handleSelectFire);
   return (
     <FirefighterSideBar hideLoginRegister>
       <div className="flex flex-col p-2 md:p-6">
@@ -63,6 +64,7 @@ export default function FirefighterDashboard() {
                   selectedFireLocation={fireLocation}
                   onSelectFire={handleSelectFire}
                   onDeselect={clearSelect}
+                  selectedFireId={fireLocation}
                 />
               </div>
               <MapStatsOverlay nearbyFires={nearbyFires} />

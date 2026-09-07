@@ -13,6 +13,7 @@ import { PageHeader } from '../../components/layout/pageHeader';
 import { NotificationToastHost } from '../../components/notification/NotificationToastHost';
 import { NearbyReports } from '../../components/shared/nearbyReports';
 import { useNearbyFires } from '../../hooks/useNearbyFires';
+import { useMapLink } from '../../hooks/useMapLink';
 
 import React from 'react';
 
@@ -33,6 +34,8 @@ export default function GuestPublicDashboard() {
   const { fireLocation, handleSelectFire, clearSelect } = useFireSelect();
   const [recenterCount, setRecenterCount] = useState(0);
   const { userLocation, nearbyFires } = useNearbyFires();
+
+  useMapLink(handleSelectFire);
 
   const handleRecenter = () => {
     recenter();
@@ -68,6 +71,7 @@ export default function GuestPublicDashboard() {
                 selectedFireId={fireLocation}
                 onSelectFire={handleSelectFire}
                 onDeselect={clearSelect}
+                selectedFireLocation={fireLocation}
               />
 
               {/* action buttons */}
