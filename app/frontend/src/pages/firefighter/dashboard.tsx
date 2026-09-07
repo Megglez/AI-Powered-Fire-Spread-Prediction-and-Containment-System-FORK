@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import type { LocalLine, CreateContainmentLine } from '@/types/ContainmentLines';
 import { FirefighterSideBar } from '../../components/firefighter/FirefighterSidebar';
 import { QuickActions } from '../../components/firefighter/quickActions';
 import { NearbyReports } from '../../components/shared/nearbyReports';
@@ -12,7 +13,6 @@ import { useRotate } from '../../hooks/useRotate';
 import { PageHeader } from '../../components/layout/pageHeader';
 import { NotificationToastHost } from '../../components/notification/NotificationToastHost';
 import { RotateHint } from '../../components/shared/RotateHint';
-import type { LocalLine, CreateContainmentLine } from '@/types/ContainmentLines';
 
 export default function FirefighterDashboard() {
   const [drawMode, setDrawMode] = useState(false);
