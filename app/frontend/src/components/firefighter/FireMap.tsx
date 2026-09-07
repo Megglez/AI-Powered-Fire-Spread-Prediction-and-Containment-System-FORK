@@ -1,5 +1,6 @@
 'use client';
 
+
 import 'mapbox-gl/dist/mapbox-gl.css';
 import circle from '@turf/circle';
 import type { Feature, LineString } from 'geojson';
@@ -19,6 +20,7 @@ import { probeHealth } from '../../lib/offline/shared';
 import type { ReportStatus } from '../../types/Report';
 import { useUpdateUserLocation } from '../../hooks/useUpdateUserLocation';
 
+
 interface MapProps{
     lat: number;
     lng: number;
@@ -37,15 +39,19 @@ interface MapProps{
     showKey?: boolean;
 }
 
+
 function wktCoords(wkt: string): number[][]{
   const inner = wkt.replace(/^LINESTRING\s*\(/i,'').replace(/\)$/,'');
   return inner.split(',').map(p => p.trim().split(/\s+/).map(Number));
 }
 
+
 export function FireMap({lat, lng, drawMode, onDrawComplete, clearDrawings, predictions = [], currentTick=0, onDeselect = undefined, selectedFireId = null,selectedFireLocation = null, onSelectFire = undefined, showKey = false, lines = [], onLineRemoved = undefined}: MapProps) {
+
 
   const mapRef = useRef<MapRef | null>(null);
   const drawRef = useRef<MapboxDraw | null>(null);
+
 
   const { reports: fires } = useFirefighterReports(''); // no search — just the full nearby fires list for the map
   const [activeFires, setActiveFires] = useState<FirefighterReportTable[]>([]);
@@ -55,6 +61,8 @@ export function FireMap({lat, lng, drawMode, onDrawComplete, clearDrawings, pred
   const { refetchAfterAction, showToast } = useNotifications();
   const updateUserLocation = useUpdateUserLocation(refetchAfterAction);
   const checkGuestNotifications = useGuestNotifications(showToast);
+  const [showUserLocationTooltip, setShowUserLocationTooltip] = useState(false);
+
 
   useEffect(() => {
     async function syncFires() {
@@ -62,6 +70,7 @@ export function FireMap({lat, lng, drawMode, onDrawComplete, clearDrawings, pred
         const verifiedFires = fires.filter(
           (f) => f.status?.toLowerCase() === 'verified'
         );
+
 
         setActiveFires(verifiedFires);
         const mapped: FireReportMapResponse[] = fires.map((f) => ({
@@ -79,6 +88,7 @@ export function FireMap({lat, lng, drawMode, onDrawComplete, clearDrawings, pred
         await offlineStore.cacheIncidents(mapped);
         return;
       }
+
 
       const isOnline = await probeHealth();
       if (!isOnline) {
@@ -106,8 +116,10 @@ export function FireMap({lat, lng, drawMode, onDrawComplete, clearDrawings, pred
       }
     }
 
+
     syncFires();
   }, [fires]);
+
 
   const handleDrawCreate = useCallback(
     (e: DrawCreateEvent) => {
@@ -116,7 +128,9 @@ export function FireMap({lat, lng, drawMode, onDrawComplete, clearDrawings, pred
       const coords = (line.geometry as LineString).coordinates;
       const wkt = `LINESTRING(${coords.map((c: number[]) => `${c[0]} ${c[1]}`).join(', ')})`;
 
+
       onDrawComplete(wkt);
+
 
       drawRef.current?.deleteAll();
       drawRef.current?.changeMode('simple_select');
@@ -124,11 +138,13 @@ export function FireMap({lat, lng, drawMode, onDrawComplete, clearDrawings, pred
     [onDrawComplete]
   );
 
+
   useEffect(() => {
     if (!mapRef.current) {
       return undefined;
     }
     const map = mapRef.current.getMap();
+
 
     if (drawMode) {
       if (!drawRef.current) {
@@ -144,10 +160,12 @@ export function FireMap({lat, lng, drawMode, onDrawComplete, clearDrawings, pred
       drawRef.current.changeMode('simple_select');
     }
 
+
     return () => {
       map.off('draw.create', handleDrawCreate);
     };
   }, [drawMode, handleDrawCreate]);
+
 
   // Reset the containment lines on clear
   const initialMount = useRef(true);
@@ -158,6 +176,7 @@ export function FireMap({lat, lng, drawMode, onDrawComplete, clearDrawings, pred
     }
     drawRef.current?.deleteAll()
   }, [clearDrawings]);
+
 
   // GeoJson collection for mapbox
   const containmentFeatures = useMemo(() => ({
@@ -173,11 +192,14 @@ export function FireMap({lat, lng, drawMode, onDrawComplete, clearDrawings, pred
     })),
   }), [lines]);
 
-  
+
+ 
   useEffect(() => {
     setViewState((v) => ({ ...v, longitude: lng, latitude: lat }));
 
+
     console.log('Firemap location effect:', { lat, lng, isAuth, isAuthLoading });
+
 
     if (isAuth) {
       updateUserLocation(lat, lng);
@@ -185,6 +207,7 @@ export function FireMap({lat, lng, drawMode, onDrawComplete, clearDrawings, pred
       checkGuestNotifications(lat, lng);
     }
   }, [lat, lng, isAuth, isAuthLoading, updateUserLocation, checkGuestNotifications]);
+
 
   const circleFeatures = useMemo(
     () =>
@@ -200,6 +223,7 @@ export function FireMap({lat, lng, drawMode, onDrawComplete, clearDrawings, pred
     [activeFires]
   );
 
+
   useEffect(() => {
     if (!selectedFireId && !selectedFireLocation) return;
     const fire = activeFires.find((f) => (selectedFireId && f.ref === selectedFireId) || (selectedFireLocation && f.location === selectedFireLocation));
@@ -212,6 +236,7 @@ export function FireMap({lat, lng, drawMode, onDrawComplete, clearDrawings, pred
     }));
   }, [selectedFireId, selectedFireLocation, activeFires]);
 
+
   useEffect(() => {
     if (!selectedFireId && !selectedFireLocation){
       setSelectedFire(null);
@@ -220,6 +245,7 @@ export function FireMap({lat, lng, drawMode, onDrawComplete, clearDrawings, pred
     const fire = activeFires.find((f) => (selectedFireId && f.ref === selectedFireId) || (selectedFireLocation && f.location === selectedFireLocation));
     setSelectedFire(fire ?? null);
   }, [selectedFireId, selectedFireLocation, activeFires]);
+
 
   useEffect(() => {
     if(!mapRef.current)
@@ -231,32 +257,41 @@ export function FireMap({lat, lng, drawMode, onDrawComplete, clearDrawings, pred
     });
     resizeObserver.observe(container);
 
+
     return () => resizeObserver.disconnect();
   }, []);
 
+
   const EXTENT_DEG = 0.05;
+
 
     const girdFeautures = useMemo(() => {
         if(!predictions?.length) return [];
 
+
         const features = [];
+
 
         for (const p of predictions){
             const grid = p.history[currentTick]
             if(!grid || !p.grid_h || !p.grid_w) continue;
+
 
             const cellLonSize = p.lon_extent_deg / p.grid_w;
             const cellLatSize = p.lat_extent_deg / p.grid_h;
             const minLon = p.lng - p.lon_extent_deg / 2;
             const maxLat = p.lat + p.lat_extent_deg / 2;
 
+
             for(let row = 0; row < p.grid_h; row++){
                 for(let col = 0; col < p.grid_w; col++){
                     const state = grid[row * p.grid_w+ col];
                     if(state === 0) continue;
 
+
           const cellMinLon = minLon + col * cellLonSize;
           const cellMaxLat = maxLat - row * cellLatSize;
+
 
                     features.push({
                         type: 'Feature',
@@ -277,6 +312,7 @@ export function FireMap({lat, lng, drawMode, onDrawComplete, clearDrawings, pred
         }
         return features;
     }, [predictions, currentTick])
+
 
   return (
     <div className='relative w-full h-full'>
@@ -305,6 +341,7 @@ export function FireMap({lat, lng, drawMode, onDrawComplete, clearDrawings, pred
       </div>
     )}
 
+
     <Map
       ref={mapRef}
       mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
@@ -312,10 +349,56 @@ export function FireMap({lat, lng, drawMode, onDrawComplete, clearDrawings, pred
       onMove={
         (evt) => {setViewState(evt.viewState);}
       }
+      onClick={() => {
+        setShowUserLocationTooltip(false);
+      }}
       style={{ width: '100%', height: '100%' }}
       mapStyle="mapbox://styles/mapbox/navigation-night-v1"
     >
       <NavigationControl position='bottom-right' showCompass={false}/>
+
+
+      {lat != null && lng != null && (
+        <Marker
+          longitude={lng}
+          latitude={lat}
+          anchor='center'
+          onClick={(e) => {
+            e.originalEvent.stopPropagation();
+            setShowUserLocationTooltip((prev) => !prev);
+          }}
+        >
+          <div
+            role='button'
+            tabIndex={0}
+            aria-label='Your location marker'
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                setShowUserLocationTooltip((prev) => !prev);
+              }
+            }}
+            className='relative flex items-center justify-center w-11 h-11 cursor-pointer focus:outline-none'
+          >
+            {showUserLocationTooltip && (
+              <div className='absolute -top-7 left-1/2 -translate-x-1/2 flex items-center px-2 py-0.5 rounded bg-carbon-side/95 border border-carbon-stroke text-[11px] font-medium text-text-primary whitespace-nowrap shadow-lg z-20 pointer-events-none'>
+                Your location
+              </div>
+            )}
+            <span
+              className='animate-ping absolute inline-flex w-5 h-5 rounded-full opacity-75 pointer-events-none'
+              style={{ backgroundColor: 'var(--color-wind, #378add' }}
+            />
+
+
+            <span
+              className='relative inline-flex rounded-full size-3 border-2 border-white shadow-md shadow-black pointer-events-none'
+              style={{ backgroundColor: 'var(--color-wind, #378add)' }}
+            />
+          </div>
+        </Marker>
+      )}
+
 
       {activeFires.map((fire) => (
         <Marker
@@ -342,6 +425,7 @@ export function FireMap({lat, lng, drawMode, onDrawComplete, clearDrawings, pred
         </Marker>
       ))}
 
+
       {/* Circles around markers */}
       {circleFeatures.length > 0 && (
         <Source
@@ -361,6 +445,7 @@ export function FireMap({lat, lng, drawMode, onDrawComplete, clearDrawings, pred
             }}
           />
 
+
           <Layer
             id="fire-radius-outline"
             type="line"
@@ -371,6 +456,7 @@ export function FireMap({lat, lng, drawMode, onDrawComplete, clearDrawings, pred
           />
         </Source>
       )}
+
 
       {girdFeautures.length > 0 && (
         <Source
@@ -388,6 +474,7 @@ export function FireMap({lat, lng, drawMode, onDrawComplete, clearDrawings, pred
             }}
           />
 
+
           <Layer
             id="simulation-outline"
             type="line"
@@ -399,6 +486,7 @@ export function FireMap({lat, lng, drawMode, onDrawComplete, clearDrawings, pred
           />
         </Source>
       )}
+
 
       {/* Containment Lines */}
       {lines.length > 0 && (
@@ -417,6 +505,7 @@ export function FireMap({lat, lng, drawMode, onDrawComplete, clearDrawings, pred
             }}
           />
 
+
           <Layer
             id='containment-line-synced'
             type='line'
@@ -427,6 +516,7 @@ export function FireMap({lat, lng, drawMode, onDrawComplete, clearDrawings, pred
               'line-dasharray': [2,1]
             }}
           />
+
 
           <Layer
             id='containment-line-draft'
@@ -439,8 +529,10 @@ export function FireMap({lat, lng, drawMode, onDrawComplete, clearDrawings, pred
             }}
           />
 
+
         </Source>
       )}
+
 
       {selectedFire && (
         <Popup
