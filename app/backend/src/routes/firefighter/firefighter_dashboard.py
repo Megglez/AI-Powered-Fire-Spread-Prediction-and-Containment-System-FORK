@@ -73,3 +73,14 @@ def get_containment_lines(fire_ref: str, db: Session = Depends(get_db)):
         return containment_lines.get_lines_for_fire(db, fire_ref)
     except ValueError as error:
         raise HTTPException(status_code=404, detail=str(error))
+
+@router.delete(
+    "/containment-line/{line_id}",
+    status_code=204,
+    responses={404: {"description": "Containment line not found"}}
+)
+def remove_containment_line(line_id: str, db: Session = Depends(get_db)):
+    try:
+        containment_lines.delete_containment_line(db, line_id)
+    except ValueError as error:
+        raise HTTPException(status_code=404, detail=str(error))

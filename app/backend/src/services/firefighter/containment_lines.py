@@ -90,3 +90,16 @@ def get_lines_for_fire(db: Session, fire_ref: str):
     )
 
     return {"data": rows, "total": len(rows)}
+
+def delete_containment_line(db: Session, line_id: str):
+    line = (
+        db.query(ContainmentLines)
+        .filter(ContainmentLines.id == line_id)
+        .first()
+    )
+
+    if line is None:
+        raise ValueError(f"ContainmentLines line {line_id} not found")
+
+    db.delete(line)
+    db.commit()

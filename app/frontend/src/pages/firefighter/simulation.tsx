@@ -25,7 +25,8 @@ export default function Simulation() {
     submitLine,
     loading: savingLine,
     error: lineError,
-    fetchLines
+    fetchLines,
+    deleteLine
   } = useContainmentLine();
 
   const {
@@ -83,6 +84,18 @@ export default function Simulation() {
   function handleReset() {
     seekToTick(0);
     pause();
+  }
+
+  async function handleDeleteLine(line: LocalLine) {
+    setLines(prev => prev.filter(l => l.localId !== line.localId));
+
+    if (!line.dbId) return;
+
+    try{
+      await deleteLine(line.dbId)
+    } catch {
+      setLines(prev => [...prev, line]);
+    }
   }
 
   async function handleDrawComplete(wkt: string) {
@@ -324,6 +337,7 @@ export default function Simulation() {
               predictions={predictions}
               currentTick={currentTick}
               status={status}
+              onDeleteLine={handleDeleteLine}
             />
           </div>
         </div>
