@@ -9,6 +9,8 @@ import { useFirefighterReports } from '../../hooks/useFirefighterReports';
 import { PageHeader } from '../../components/layout/pageHeader';
 import { useRotate } from '../../hooks/useRotate';
 import { RotateHint } from '../../components/shared/RotateHint';
+import type { LocalLine, CreateContainmentLine } from '@/types/ContainmentLines';
+
 
 export default function Simulation() {
   const { reports: fires } = useFirefighterReports('');
@@ -17,13 +19,13 @@ export default function Simulation() {
   const [drawMode, setDrawMode] = useState(false);
   const [userLocation] = useState(defaultLocation);
   const [clearDrawings, setClearDrawings] = useState(0);
-
-  const [containmentLines, setContainmentLines] = useState<string[]>([]);
+  const [lines, setLines] = useState<LocalLine[]>([])
   const { showHint, dismiss } = useRotate();
   const {
     submitLine,
     loading: savingLine,
     error: lineError,
+    fetchLines
   } = useContainmentLine();
 
   const {
@@ -44,9 +46,28 @@ export default function Simulation() {
   const isPlaying = status === 'playing';
   const hasResult = totalTicks > 0;
 
+  useEffect(() => {
+    clearMap();
+    if (!selectedFireId) { setLines([]); return;}
+    let cancled = false;
+
+    fetchLines(selectedFireId).then(rows => {
+      if (cancled) return;
+      setLines(rows.map(r => ({
+        localId: r.id,
+        dbId: r.id,
+        wkt: r.line_geom,
+        fireReportId: r.fire_report_id,
+        synced: true,
+      })));
+    });
+    return () => {cancled = true};
+  }, [selectedFireId, fetchLines, clearMap])
+
   function handleRun() {
       const steps = selectedFireId ? 288 : 4
-      runSimulation(selectedFireId, steps, containmentLines);
+      const drafts = lines.filter(l => !l.synced).map(l => l.wkt);
+      runSimulation(selectedFireId, steps, drafts);
   }
 
   function handleStop(){
@@ -56,7 +77,7 @@ export default function Simulation() {
   function handleClear(){
     clearMap();
     setClearDrawings((prev) => prev + 1);
-    setContainmentLines([]);
+    setLines(prev => prev.filter(l => l.synced))
   }
 
   function handleReset() {
@@ -64,11 +85,28 @@ export default function Simulation() {
     pause();
   }
 
-  useEffect(() => {
-    clearMap();
-  }, [selectedFireId, clearMap])
+  async function handleDrawComplete(wkt: string) {
+    const localId = crypto.randomUUID();
+    setLines(prev => [...prev, {
+      localId, dbId: null, wkt, fireReportId: null, synced: false,
+    }]);
+    setDrawMode(false);
 
-  const canClear = hasResult || containmentLines.length > 0 || currentTick > 0;
+    try{
+      const saved = await submitLine({wkt});
+      if(!saved?.id){
+        setLines(prev => prev.filter(l => l.localId !== localId))
+        return;
+      }
+      setLines(prev => prev.map(l =>
+        l.localId === localId ? {...l, dbId: saved.id, fireReportId: saved.fire_report_id, synced: true} : l
+      ));
+    }catch {
+      setLines(prev => prev.filter(l => l.localId !== localId))
+    }
+  }
+
+  const canClear = hasResult || lines.length > 0 || currentTick > 0;
 
     const maxSlider = Math.max(totalTicks-1, 1);    // Timeline slider tracks currentTick when simulation is running. Manual drag seeks to specific task
     const totalHours = hasResult ? (maxSlider / 4) : 72;
@@ -129,11 +167,8 @@ export default function Simulation() {
                   lat={userLocation.lat}
                   lng={userLocation.lng}
                   drawMode={drawMode}
-                  onDrawComplete={(line) => {
-                    submitLine(line);
-                    setDrawMode(false);
-                  }}
-                  onContainmentChange={setContainmentLines}
+                  onDrawComplete={handleDrawComplete}
+                  lines={lines}
                   clearDrawings={clearDrawings}
                   predictions={predictions}
                   currentTick={currentTick}
@@ -213,7 +248,7 @@ export default function Simulation() {
                     className='btn btn-outline btn-info rounded-xl flex-1 disabled:opacity-30 disabled:pointer-events-none'
                   >
                     <Trash2 size={20}/>
-                    Clear Map
+                    Clear Drawings
                   </button>
                 </div>
               </div>
@@ -284,7 +319,7 @@ export default function Simulation() {
           <div className="basis-full lg:basis-1/4 rounded-2xl bg-carbon-side border border-carbon-stroke overflow-y-auto max-h-[40vh] lg:max-h-none">
             <SimulationResults
               // Pass live stats so panel can show burning/burned counts per tick
-              containmentLines={containmentLines}
+              containmentLines={lines}
               selectedFireId={selectedFireId}
               predictions={predictions}
               currentTick={currentTick}
