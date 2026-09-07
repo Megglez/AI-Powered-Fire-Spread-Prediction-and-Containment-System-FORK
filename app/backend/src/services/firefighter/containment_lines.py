@@ -12,7 +12,7 @@ from app.backend.src.models.containment_lines import ContainmentLines
 from app.backend.src.models.reported_fires import FireReports
 from app.backend.src.enums.report_status import ReportStatus
 
-MAX_RADIUS = 2  # max radius for containement auto-detection of nearby fire
+MAX_RADIUS = 5  # max radius for containement auto-detection of nearby fire
 
 
 # gets the containment lines
