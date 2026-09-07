@@ -18,7 +18,7 @@ def test_log_containment_line_2km(client, db):
 
 # draw a line test for a line outside 5km
 def test_log_containment_line_5km(client, db):
-    fire = make_report(db, status=ReportStatus.verified)
+    fire = make_report(db, lat=-25.700, lng=28.2293, status=ReportStatus.verified)
 
     response = client.post(
         "/api/firefighter/containment-line",
