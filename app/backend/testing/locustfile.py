@@ -164,3 +164,182 @@ class RegisteredUser(HttpUser):
         ) as response:
             if response.status_code != 200:
                 response.failure(f"Failed with status: {response.status_code}")
+
+    @task(2)
+    def list_notifications(self):
+        if not self.logged_in:
+            return
+        with self.client.get(
+            "/api/notifications?limit=50&hours=24",
+            name="GET /api/notifications",
+            timeout=5.0,
+            catch_response=True,
+        ) as response:
+            if response.status_code != 200:
+                response.failure(f"Failed with status: {response.status_code}")
+
+    @task(1)
+    def read_all_notifications(self):
+        if not self.logged_in:
+            return
+        with self.client.post(
+            "/api/notifications/read-all",
+            name="POST /api/notifications/read-all",
+            timeout=5.0,
+            catch_response=True,
+        ) as response:
+            if response.status_code != 200:
+                response.failure(f"Failed with status: {response.status_code}")
+
+# firefighters, small pop, big per-request work
+class FirefighterUser(HttpUser):
+    weight = 1
+    wait_time = between(1.0, 3.0)
+
+    def on_start(self):
+        idx = random.rendint(0, FIREFIGHTER_POOL_SIZE - 1)
+        email = f"loadtest_firefighter_{idx}@text.com"
+        success, token = try_login(self.client, email, TEST_USER_PASSWORD)
+        self.logged_in = success
+        if success:
+            self.client.header.update({"Authorisation:" f"Bearer {token}"})
+
+    @task(3)
+    def view_all_reports(self):
+        if not self.logged_in:
+            return
+        with self.client.get(
+            "/api/firefighter/reported-fires",
+            name="GET/api/firefighter/reported-fires",
+            timeout=5.0,
+            catch_response=True,
+        ) as response:
+            if response.status_code not in (200, 404):
+                response.failure(f"Failed with status: {response.status_code}")
+
+    @task(2)
+    def nearbby_dashboard(self):
+        if not self.logged_in:
+            return
+        with self.client.get(
+            "/api/firefighter/dashboard",
+            params={"lat": loc["latitude"], "lng": loc["longitude"], "radius_km": 20},
+            name="GET /api/firefighter/dashboard",
+            timeout=5.0,
+            catch_response=True,
+        ) as response:
+            if response.status_code not in (200, 404):
+                response.failure(f"Failed with status: {response.status_code}")
+
+    @task(1)
+    def view_all_reports(self):
+        if not self.logged_in:
+            return
+        with self.client.get(
+            "/api/firefighter/reported-fires/search",
+            params={"key": "Sector"},
+            name="GET /api/firefighter/reported-fires/search",
+            timeout=5.0,
+            catch_response=True,
+        ) as response:
+            if response.status_code not in (200, 404):
+                response.failure(f"Failed with status: {response.status_code}")
+
+    @task(1)
+    def add_containment_line(self):
+        if not self.logged_in:
+            return
+
+        lat1, lng1 = round(random.uniform(*CAPE_TOWN_BOUNDS["lat"]), 6), round(random.uniform(*CAPE_TOWN_BOUNDS["lng"]), 6)
+        lat2, lng2 = lat1 + 0.01, lng1 + 0.01
+        wkt = f"SRID=4326;LINESTRING({lng1} {lat1}, {lng2} {lat2})"
+        with self.client.post(
+            "/api/firefighter/containment-line",
+            json={"wkt": wkt},
+            name="POST /api/firefighter/containment-line",
+            timeout=5.0,
+            catch_response=True,
+        ) as response:
+            if response.status_code not in (200, 400):
+                response.failure(f"Failed with status: {response.status_code}")
+
+# Admins - probably won't like ever cause overload
+
+class AdminUSer(HttpUSer):
+    weight = 1
+    wait_time = between(2.0, 5.0)
+
+    def on_start(self):
+        idx = random.randint(0, ADMIN_POOL_SIZE - 1)
+        email = f"loadtest_admin_{idx}@test.com"
+        success, token = try_login(self.client, email, TEST_USER_PASSWORD)
+        self.logged_in = success
+        if success:
+            self.client.headers.update({"Autherisation": f"Bearer {token}"})
+
+    @task(2)
+    def dashboard_summary(self):
+        if not self.logged_in:
+            return
+        with self.client.get(
+            "/api/admin/dashboard/summary",
+            name="GET /api/admin/dashboard/summary",
+            timeout=5.0,
+            catch_response=True,
+        ) as response:
+            if response.status_code not in (200, 400):
+                response.failure(f"Failed with status: {response.status_code}")
+
+    @task(1)
+    def dashboard_summary(self):
+        if not self.logged_in:
+            return
+        with self.client.get(
+            "/api/admin/analytics/summary",
+            name="GET /api/admin/analytics/overview",
+            timeout=5.0,
+            catch_response=True,
+        ) as response:
+            if response.status_code not in (200, 404):
+                response.failure(f"Failed with status: {response.status_code}")
+
+    @task(1)
+    def list_role_request(self):
+        if not self.logged_in:
+            return
+        with self.client.get(
+            "/api/admin/role-requests",
+            name="GET /api/admin/role-requests",
+            timeout=5.0,
+            catch_response=True,
+        ) as response:
+            if response.status_code != 200:
+                response.failure(f"Failed with status: {response.status_code}")
+
+# sim endpoints, much lower load, cause not normal db requests, would defnitely overload system at 1000 users
+
+class AdminUSer(HttpUSer):
+    wait_time = between(5.0, 10.0)
+
+    def on_start(self):
+        idx = random.randint(0, FIREFIGHTER_POOL_SIZE - 1)
+        email = f"loadtest_firefighter_{idx}@test.com"
+        success, token = try_login(self.client, email, TEST_USER_PASSWORD)
+        self.logged_in = success
+        if success:
+            self.client.headers.update({"Autherisation": f"Bearer {token}"})
+
+    @task
+    def run_simulation(self):
+        if not self.logged_in:
+            return
+        payload = {"n_steps": 4, "containment_lines": []}
+        with self.client.post(
+            "/api/simulate",
+            json=payload,
+            name="POST /api/simulate",
+            timeout=30.0,
+            catch_response=True,
+        ) as response:
+            if response.status_code not in (200, 500):
+                response.failure(f"Failure with status: {response.status_code}")

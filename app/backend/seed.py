@@ -17,6 +17,12 @@ from app.backend.src.models.users import User
 
 DEFAULT_PASSWORD = os.getenv("SEED_DEFAULT_PASSWORD")
 ADMIN_PASSWORD = os.getenv("SEED_ADMIN_PASSWORD")
+LOADTEST_PASSWORD = os.getenv("LOADTEST_USER_PASSWORD", DEFAULT_PASSWORD)
+
+LOADTEST_USER_COUNT = 200
+LOADTEST_FIREFIGHTER_COUNT = 20
+LOADTEST_ADMIN_COUNT = 3
+
 
 if not DEFAULT_PASSWORD:
     raise ValueError("Missing env variables for passwords")
@@ -605,6 +611,60 @@ def seed_fire_reports(db):
         db.add(report)
         print(f"  ADD   fire report -> {ref} at {loc['name']}")
 
+def seed_loadtest_accounts(db):
+    """Accounts for Locust load testing"""
+    new_hash = hash_password(LOADTEST_PASSWORD)
+
+    def upsert(email, role, id_number, license_number=None):
+        existing = db. query(User).filter(User.email == email).first()
+        if existing:
+            existing.hashed_password = new_hash
+            existing.role = role
+            existing.is_active = True
+            existing.is_2fa_enabled = False
+            existing.totp_secret = None
+            print(f" UPDATE {email} ({role})")
+            return
+
+        user = User(
+            id=str(uuid.uuid4()),
+            name="LoadTest",
+            surname=f"{role.capitalize()}",
+            email=email,
+            id_number=id_number,
+            license_number=license_number,
+            hash_password=new_hash,
+            role=role,
+            is_active=True,
+            is_2fa_enabled=False,
+            totp_secret=None,
+        )
+        db.add(user)
+        print(f" {email} ({role})")
+
+    for i in range(LOADTEST_USER_COUNT):
+        upsert(
+            email=f"loadtest_user_{i}@test.com",
+            role="user",
+            id_number=f"9001010{i:05d}",
+        )
+
+    for i in range(LOADTEST_USER_COUNT):
+        upsert(
+            email=f"loadtest_firefighterr_{i}@test.com",
+            role="firefighter",
+            id_number=f"9101010{i:05d}",
+            license_number=f"FF-LOAD-{i:04d}",
+        )
+
+    for i in range(LOADTEST_USER_COUNT):
+        upsert(
+            email=f"loadtest_admin_{i}@test.com",
+            role="admin",
+            id_number=f"9201010{i:05d}",
+        )
+
+    db.flush()
 
 def wipe_all_data(db):
     print(" Wiping database for a reseed")
@@ -617,7 +677,7 @@ def wipe_all_data(db):
     print("All databases cleared")
 
 
-def seed(reseed: bool = False):
+def seed(reseed: bool = False, with_loadtest: bool = False):
     print("Creating tables if they don't exist...")
 
     db = SessionLocal()
@@ -634,6 +694,10 @@ def seed(reseed: bool = False):
         print("\nSeeding fire reports...")
         seed_fire_reports(db)
 
+        if with_loadtest:
+            print("/nSeeding load-test account...")
+            seed_loadtest_accounts(db)
+
         db.commit()
         print("\nSeed complete!")
 
@@ -643,7 +707,6 @@ def seed(reseed: bool = False):
         raise
     finally:
         db.close()
-
 
 if __name__ == "__main__":
     is_reseed = "--reseed" in sys.argv
