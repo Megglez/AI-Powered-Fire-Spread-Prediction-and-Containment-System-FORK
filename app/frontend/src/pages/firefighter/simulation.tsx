@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Pencil, CirclePlay, Pause, RotateCcw, AlertTriangle, Loader2, Square, Trash2, SquareActivity } from 'lucide-react';
+import type { LocalLine, CreateContainmentLine } from '@/types/ContainmentLines';
 import { FirefighterSideBar } from '../../components/firefighter/FirefighterSidebar';
 import { SimulationResults } from '../../components/firefighter/simulationResult';
 import { FireMap } from '../../components/shared/DynamicFirefighterMap';
@@ -9,7 +10,6 @@ import { useFirefighterReports } from '../../hooks/useFirefighterReports';
 import { PageHeader } from '../../components/layout/pageHeader';
 import { useRotate } from '../../hooks/useRotate';
 import { RotateHint } from '../../components/shared/RotateHint';
-import type { LocalLine, CreateContainmentLine } from '@/types/ContainmentLines';
 
 
 export default function Simulation() {

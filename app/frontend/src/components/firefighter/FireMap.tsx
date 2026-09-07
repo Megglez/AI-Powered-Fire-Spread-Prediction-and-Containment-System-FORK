@@ -10,6 +10,7 @@ import MapboxDraw, { DrawCreateEvent } from '@mapbox/mapbox-gl-draw';
 import { useGuestNotifications } from '@/hooks/useGuestNotifications';
 import { useNotifications } from '@/hooks/useNotification';
 import { useAuth } from '@/hooks/useAuth';
+import { LocalLine } from '@/types/ContainmentLines';
 import { Prediction } from '../../hooks/useSimulation';
 import type { FirefighterReportTable } from '../../types/FirefighterReports';
 import { useFirefighterReports } from '../../hooks/useFirefighterReports';
@@ -17,13 +18,12 @@ import { offlineStore, FireReportMapResponse } from '../../lib/offlineStore';
 import { probeHealth } from '../../lib/offline/shared';
 import type { ReportStatus } from '../../types/Report';
 import { useUpdateUserLocation } from '../../hooks/useUpdateUserLocation';
-import { LocalLine } from '@/types/ContainmentLines';
 
 interface MapProps{
     lat: number;
     lng: number;
     drawMode: boolean;
-    lines: LocalLine[];
+    lines?: LocalLine[];
     onDrawComplete: (wkt: string) => void;
     onLineRemoved?: (localId: string) => void;
     clearDrawings: number;

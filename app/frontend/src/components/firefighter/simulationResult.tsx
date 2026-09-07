@@ -1,8 +1,8 @@
+import { LocalLine } from '@/types/ContainmentLines';
 import { EnvironmentWidgets } from './EnvironmentWidgets';
 import { LoggedContainmentLine } from './containmentLineCard';
 import { Prediction, SimulationStatus } from '../../hooks/useSimulation';
 import { useNearbyFires } from '../../hooks/useNearbyFires';
-import { LocalLine } from '@/types/ContainmentLines';
 
 interface SimulationResultsProps {
   predictions?: Prediction[];
