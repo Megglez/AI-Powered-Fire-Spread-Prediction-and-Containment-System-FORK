@@ -11,7 +11,7 @@ export function useContainmentLine(onDraw?: () => void) {
       setLoading(true);
       setError(null);
       try {
-        const saved: ContainmentLines = await apiCall('/firefighter/containment-line', 'POST', {
+        const saved: ContainmentLine = await apiCall('/firefighter/containment-line', 'POST', {
           wkt,
         } satisfies CreateContainmentLine);
         onDraw();
