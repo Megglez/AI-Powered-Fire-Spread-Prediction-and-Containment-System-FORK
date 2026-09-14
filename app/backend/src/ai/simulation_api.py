@@ -23,7 +23,7 @@ from app.backend.ml.features.real_data_loader import load_real_inference_data
 from app.backend.src.ai.simulation import build_boundary_ignition_mask
 from .cache import build_fire_cache_key, get_cached_prediction, cache_prediction
 from app.backend.ml.models.nowcast_model import WeatherDeltaModel, WeatherDeltaModelConfig
-from app.backend.src.models.containment_lines import ContainmentLines
+from models.containment_lines import ContainmentLines
 from collections import defaultdict
 
 router = APIRouter(prefix="/api", tags=["simulation"])
