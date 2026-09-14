@@ -10,7 +10,7 @@ from sqlalchemy import func
 
 from models.containment_lines import ContainmentLines
 from models.reported_fires import FireReports
-from app.backend.src.enums.report_status import ReportStatus
+from enums.report_status import ReportStatus
 
 MAX_RADIUS = 5  # max radius for containement auto-detection of nearby fire
 
