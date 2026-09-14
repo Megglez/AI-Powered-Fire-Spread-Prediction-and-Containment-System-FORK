@@ -46,7 +46,7 @@ database/minio/
 
 # artifact_store
 artifact_store/ignition/
-venv/
+
 *.venv
 .venv*/
 venv312/
@@ -59,7 +59,6 @@ app/datasets/raw_data/*
 !app/datasets/raw_data/fire_nrt_J2V-C2_778685.csv
 app/datasets/processed/
 
-artifact_store/
 app/backend/artifact_store/
 app/backend/datasets/
 ml/*.pkl
@@ -72,9 +71,3 @@ ml/checkpoints/
 .idea/
 .DS_Store
 
-*.rpm
-
-app/gpu-worker/.env
-app/gpu-worker/venv/
-
-**/.env

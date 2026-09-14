@@ -10,7 +10,7 @@ WORKDIR /app
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PYTHONPATH=/app \
+    PYTHONPATH=/app:/app/app/backend:/app/app/backend/src \
     UV_COMPILE_BYTECODE=1
 
 # Layer base lockfile early for docker caching
@@ -50,12 +50,11 @@ FROM base AS prod
 
 RUN useradd -r -u 10001 -g users -s /usr/sbin/nologin appuser
 
-COPY app/__init__.py    /app/app/__init__.py
-COPY app/artifact_store /app/app/artifact_store
-COPY app/backend        /app/app/backend
+COPY --chown=appuser:appuser app/__init__.py    /app/app/__init__.py
+COPY --chown=appuser:appuser app/backend        /app/app/backend
 
 USER appuser
 
 EXPOSE 8000
 
-CMD ["uvicorn", "app.backend.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
+CMD ["uvicorn", "app.backend.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]

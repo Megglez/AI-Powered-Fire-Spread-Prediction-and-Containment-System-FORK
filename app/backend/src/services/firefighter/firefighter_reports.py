@@ -2,8 +2,8 @@ from geoalchemy2.shape import to_shape
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
-from app.backend.src.models.reported_fires import FireReports
-from app.backend.src.models.users import User
+from models.reported_fires import FireReports
+from models.users import User
 
 
 def get_fire_reports(db: Session):
@@ -17,6 +17,7 @@ def get_fire_reports(db: Session):
         shape = to_shape(fire.location_geom)
         formatted.append(
             {
+                "id": fire.id,
                 "reference_number": fire.reference_number,
                 "location_text": fire.location_text,
                 "status": fire.status,
@@ -55,6 +56,7 @@ def search_report_table(db: Session, key: str):
         shape = to_shape(fire.location_geom)
         formatted.append(
             {
+                "id": fire.id,
                 "reference_number": fire.reference_number,
                 "location_text": fire.location_text,
                 "status": fire.status,

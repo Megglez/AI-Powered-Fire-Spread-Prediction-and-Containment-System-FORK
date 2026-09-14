@@ -2,7 +2,8 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 export async function apiCall(endpoint: string, method: string = 'GET', body: unknown = null) {
   const cleanEndpoint = endpoint.startsWith('/') ? endpoint: `/${endpoint}`;
-  const url = `${API_URL}${cleanEndpoint}`
+  const base = API_URL.endsWith('/api') && cleanEndpoint.startsWith('/api/') ? API_URL.slice(0,-4) : API_URL;
+  const url = `${base}${cleanEndpoint}`
 
   const res = await fetch(url, {
     method,
@@ -15,7 +16,10 @@ export async function apiCall(endpoint: string, method: string = 'GET', body: un
   const hasJson = contentType && contentType.includes('application/json');
   const data = hasJson ? await res.json().catch(() => null) : null;
 
-  if (!res.ok) throw new Error(data.detail || 'Something went wrong');
+  if (!res.ok){
+    const detail = (data && typeof data === 'object' && 'detail' in data ? String(data.detail) : null) ?? `Request failed(${res.status})`;
+    throw new Error(detail);
+  } 
   return data;
 }
 

@@ -9,10 +9,13 @@ import React, {
 } from 'react';
 import { usePathname } from 'next/navigation';
 import type { FireNotification } from '../types/Notifications';
+import { useAuth } from './useAuth';
+
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 const PANEL_RETENTION_MS = 24 * 60 * 60 * 1000;
+
 
 function isWithinRetention(time: string): boolean {
   return Date.now() - new Date(time).getTime() < PANEL_RETENTION_MS;
@@ -20,7 +23,8 @@ function isWithinRetention(time: string): boolean {
 
 function getWebSocketUrl(path: string): string {
   const httpBase = API_URL || window.location.origin;
-  return httpBase.replace(/^http/, 'ws') + path;
+  const base = httpBase.endsWith('/api') && path.startsWith('/api/') ? httpBase.slice(0, -4) : httpBase;
+  return base.replace(/^http/, 'ws') + path;
 }
 
 type NotificationState = Readonly<{
@@ -54,6 +58,9 @@ export function NotificationsProvider({ children }: Readonly<{ children: React.R
   const [error, setError] = useState<string | null>(null);
   const [activeToast, setActiveToast] = useState<FireNotification | null>(null);
   const knownIdsRef = useRef<Set<string>>(new Set());
+  const dismissIsRef = useRef<Set<string>>(new Set());
+  const { isAuth, isLoading: isAuthLoading } = useAuth();
+
 
   const showToast = useCallback((notification: FireNotification): void => {
     setActiveToast(notification);
@@ -104,7 +111,8 @@ export function NotificationsProvider({ children }: Readonly<{ children: React.R
 
         if (options.toastIfNew) {
           const toastCandidate =
-            newlyArrived.find((n) => !n.read) ?? data.notifications.find((n) => !n.read);
+            newlyArrived.find((n) => !n.read && !dismissIsRef.current.has(n.id)) ??
+            data.notifications.find((n) => !n.read && !dismissIsRef.current.has(n.id));
 
           if (toastCandidate) {
             showToast(toastCandidate);
@@ -125,7 +133,7 @@ export function NotificationsProvider({ children }: Readonly<{ children: React.R
 
   // initial load: recent notification history, unread count, whether user has location on file at all
   useEffect(() => {
-    if (isAuthPage){
+    if (isAuthPage || isAuthLoading || !isAuth){
       return;
     }
 
@@ -146,12 +154,12 @@ export function NotificationsProvider({ children }: Readonly<{ children: React.R
     return () => {
       cancelled = true;
     };
-  }, [fetchNotifications, isAuthPage]);
+  }, [fetchNotifications, isAuthPage, isAuth, isAuthLoading]);
 
   // Live push over WebSocket. Auth comes from same access_token cookie
   // REST calls use, browsers attach it to WS handshake automatically so no token neeeds to be passed here
   useEffect(() => {
-    if (isAuthPage) {
+    if (isAuthPage || isAuthLoading || !isAuth) {
       return;
     }
 
@@ -181,9 +189,10 @@ export function NotificationsProvider({ children }: Readonly<{ children: React.R
     return () => {
       ws.close();
     };
-  }, [showToast, isAuthPage]);
+  }, [showToast, isAuthPage, isAuth, isAuthLoading]);
 
   const markAsRead = useCallback((id: string): void => {
+    dismissIsRef.current.add(id);
     // optimistic local update (UI reflects 'read' immediately rather than waitng on network round trip)
     setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
 

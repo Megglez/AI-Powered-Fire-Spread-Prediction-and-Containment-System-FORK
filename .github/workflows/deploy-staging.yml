@@ -19,7 +19,7 @@ jobs:
               run: |
                 cd app/backend
                 pip install --require-hashes -r requirements.txt -r requirements-dev.txt
-                pylint --rcfile=.pylintrc --fail-under=8.0 src main.py db.py seed.py startup_migrations.py
+                PYTHONPATH=src pylint --rcfile=.pylintrc --fail-under=8.0 src main.py db.py seed.py startup_migrations.py
             - name: Frontend lint
               run: |
                 cd app/frontend
@@ -68,7 +68,6 @@ jobs:
                 target: prod
                 build-args: |
                     NEXT_PUBLIC_MAPBOX_TOKEN=${{ secrets.NEXT_PUBLIC_MAPBOX_TOKEN }}
-                    NEXT_PUBLIC_API_URL=https://staging-fireaway.csml.co.za/api
                 tags: ${{ env.ECR_REGISTRY }}/${{ env.FRONTEND_REPO }}:${{ steps.vars.outputs.image_tag }}
 
     deploy:
